@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import (auth,)
+from routers import (auth, workouts,)
 
 app = FastAPI(title="Workout Tracker",)
 
@@ -18,6 +18,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(workouts.router)
 
 @app.get("/")
 async def root():

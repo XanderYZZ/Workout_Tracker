@@ -1,14 +1,16 @@
+from datetime import datetime
+from bson import ObjectId
 from pymongo import MongoClient
+from pymongo.results import InsertOneResult
 import config
+from typing import Dict, List, Optional
+import models
 
 MONGO_URI = config.MONGO_URI
 client = MongoClient(MONGO_URI)
 
 def GetDb():
     return client["database"]
-
-def AddExercise(exercise):
-    GetDb()["exercises"].update_one({"name": exercise["name"],}, {"$set": exercise}, upsert=True)
 
 def DoesUserExist(email: str) -> bool:
     users = GetDb()["users"]
@@ -43,3 +45,61 @@ def GetUserHashedPasswordInDB(email: str) -> str:
         raise ValueError("User not found")  
     
     return user["password"]
+
+def CreateWorkout(workout_dict : Dict) -> str:
+    workouts_collection = GetDb()["workouts"]
+    
+    result: InsertOneResult = workouts_collection.insert_one(workout_dict)
+    
+    return str(result.inserted_id)  
+
+def GetWorkoutsForUser(user_id: str,
+    start_date: Optional[datetime   ] = None,
+    end_date: Optional[datetime] = None,
+    limit: int = 50,
+    skip: int = 0
+) -> List[Dict]:
+    workouts = GetDb()["workouts"]
+    
+    filter_query = {"user_id": user_id}
+    if start_date:
+        filter_query["scheduled_date"] = {"$gte": start_date}
+    if end_date:
+        filter_query.setdefault("scheduled_date", {})["$lte"] = end_date
+
+    cursor = workouts.find(filter_query) \
+                    .sort("scheduled_date", -1  ) \
+                    .skip(skip) \
+                    .limit(limit)
+    
+    results = []
+    for doc in cursor:
+        doc["id"] = str(doc["_id"])
+        results.append(doc)
+    
+    return results
+
+def UpdateWorkout(workout_id: str, user_id: str, update_data: Dict) -> bool:
+    workouts = GetDb()["workouts"]
+
+    result = workouts.update_one(
+        {"_id": ObjectId(workout_id), "user_id": user_id},
+        {"$set": update_data}
+    )
+
+    return result.modified_count > 0
+
+def DeleteWorkout(workout_id: str, user_id: str) -> bool:
+    workouts = GetDb()["workouts"]
+    result = workouts.delete_one({"_id": ObjectId(workout_id), "user_id": user_id})
+
+    return result.deleted_count > 0
+
+def GetWorkoutById(workout_id: str, user_id: str) -> Optional[Dict]:
+    workouts = GetDb()["workouts"]
+    workout = workouts.find_one({"_id": ObjectId(workout_id), "user_id": user_id})
+
+    if workout:
+        workout["id"] = str(workout["_id"]) 
+
+    return workout
