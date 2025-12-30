@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 from pymongo import MongoClient
 from pymongo.results import InsertOneResult
@@ -62,10 +62,15 @@ def GetWorkoutsForUser(user_id: str,
     workouts = GetDb()["workouts"]
     
     filter_query = {"user_id": user_id}
-    if start_date:
-        filter_query["scheduled_date"] = {"$gte": start_date}
-    if end_date:
-        filter_query.setdefault("scheduled_date", {})["$lte"] = end_date
+
+    if start_date or end_date:
+        filter_query["scheduled_date"] = {}
+
+        if start_date:
+            filter_query["scheduled_date"]["$gte"] = start_date
+
+        if end_date:
+            filter_query["scheduled_date"]["$lte"] = end_date
 
     cursor = workouts.find(filter_query) \
                     .sort("scheduled_date", -1  ) \
@@ -73,8 +78,12 @@ def GetWorkoutsForUser(user_id: str,
                     .limit(limit)
     
     results = []
+
     for doc in cursor:
+        doc = MakeDatetimeAware(doc)
         doc["id"] = str(doc["_id"])
+        del doc["_id"] 
+        
         results.append(doc)
     
     return results
@@ -95,11 +104,44 @@ def DeleteWorkout(workout_id: str, user_id: str) -> bool:
 
     return result.deleted_count > 0
 
+def MakeDatetimeAware(doc: Optional[Dict]) -> Optional[Dict]:
+    if not doc:
+        return doc
+    
+    if doc.get("created_at") and doc["created_at"].tzinfo is None:
+        doc["created_at"] = doc["created_at"].replace(tzinfo=timezone.utc)
+    if doc.get("scheduled_date") and doc["scheduled_date"].tzinfo is None:
+        doc["scheduled_date"] = doc["scheduled_date"].replace(tzinfo=timezone.utc)
+    
+    return doc
+
 def GetWorkoutById(workout_id: str, user_id: str) -> Optional[Dict]:
     workouts = GetDb()["workouts"]
     workout = workouts.find_one({"_id": ObjectId(workout_id), "user_id": user_id})
 
     if workout:
+        workout = MakeDatetimeAware(workout)
         workout["id"] = str(workout["_id"]) 
 
     return workout
+
+def GetWorkoutsThatContainExercise(user_id : str, exercise_name : str) -> Optional[Dict]:
+    results = []
+    workouts = GetDb()["workouts"]
+    pipeline = [
+        {"$match": {
+            "user_id": user_id,
+            "exercises.name": exercise_name
+        }},
+        {"$sort": {"scheduled_date": -1}},
+        {"$limit": 50}
+    ]
+    
+    cursor = workouts.aggregate(pipeline)
+
+    for workout in cursor:
+        workout = MakeDatetimeAware(workout)
+        workout["id"] = str(workout["_id"])
+        results.append(workout)
+    
+    return results

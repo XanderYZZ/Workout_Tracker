@@ -1,5 +1,5 @@
-from pydantic import BaseModel, EmailStr, Field
-from datetime import datetime
+from pydantic import AwareDatetime, BaseModel, EmailStr, Field
+from datetime import datetime, timezone
 from typing import List, Optional
 
 class UserCreate(BaseModel):
@@ -11,24 +11,35 @@ class CurrentUser(BaseModel):
     email: str
 
 class ExerciseInWorkout(BaseModel):
-    name: str                             
+    name: str
     sets: int
     reps: int
-    weight: Optional[float] = None         
+    weight: Optional[float] = None
     notes: Optional[str] = None
 
 class WorkoutCreate(BaseModel):
-    scheduled_date: datetime 
+    scheduled_date: Optional[AwareDatetime] = None
     comments: Optional[str] = None
-    exercises: List[ExerciseInWorkout]
-    
+    exercises: List[ExerciseInWorkout] = Field(..., min_length=1)
+
 class WorkoutResponse(WorkoutCreate):
-    id: str                               
-    user_id: str                         
-    created_at: datetime = Field(default_factory=datetime.now(datetime.timezone.utc))
+    id: str
+    user_id: str
+    created_at: AwareDatetime 
+
+    model_config = {
+        "json_encoders": {
+            datetime: lambda v: v.isoformat()
+        }
+    }
+
+class ExerciseProgressReport(BaseModel):
+    exercise: str
+    total_workouts_found: int
+    workouts: List[WorkoutResponse]
+    model_config = {"from_attributes": True}
 
 class WorkoutUpdate(BaseModel):
-    """Partial update model - all fields optional"""
-    scheduled_date: Optional[datetime] = None
+    scheduled_date: Optional[AwareDatetime] = None
     comments: Optional[str] = None
     exercises: Optional[List[ExerciseInWorkout]] = None
