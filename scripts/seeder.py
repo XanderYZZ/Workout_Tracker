@@ -15,5 +15,6 @@ EXERCISES = [
      "category": "lower",},
 ]
 
-for exercise in EXERCISES:
-    database.GetDb()["exercises"].update_one({"name": exercise["name"],}, {"$set": exercise}, upsert=True)
+if __name__ == "__main__":
+    for exercise in EXERCISES:
+        database.AddExercise(exercise)
