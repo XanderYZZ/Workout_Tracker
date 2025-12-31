@@ -4,7 +4,6 @@ from pymongo import MongoClient
 from pymongo.results import InsertOneResult
 import config
 from typing import Dict, List, Optional
-import models
 
 MONGO_URI = config.MONGO_URI
 client = MongoClient(MONGO_URI)
