@@ -1,8 +1,11 @@
 import type { FC } from 'react'
 import { Link } from "react-router-dom";
+import { useAuth } from '../contexts/auth'
 import '../index.css'
 
 const Home: FC = () => {
+    const { user, logout } = useAuth();
+
     return (
         <div className="background-primary">
             <header className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur border-b border-white/10">
@@ -12,16 +15,22 @@ const Home: FC = () => {
                     </span>
 
                     <nav className="flex items-center gap-4">
-                        <Link to="/login">
-                        <a className="text-sm text-slate-300 hover:text-white transition">
-                            Log In
-                        </a>
+                        {(Object.keys(user).length != 0) ? <button
+                            onClick={logout}
+                            className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                        >
+                            Logout
+                        </button> : <><Link
+                            to="/login"
+                            className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                        >
+                            Login
                         </Link>
                         <Link to="/signup">
                         <a className="px-4 py-2 rounded-full bg-indigo-500 text-white font-medium hover:bg-indigo-400 transition">
                             Sign Up
                         </a>
-                        </Link>
+                        </Link></>}
                     </nav>
                 </div>
             </header>
