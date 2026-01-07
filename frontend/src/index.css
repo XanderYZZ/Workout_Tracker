@@ -11,3 +11,11 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@layer utilities {
+  .background-primary {
+    min-height: 100vh;
+    background-color: rgb(2 6 23);
+    color: rgb(241 245 249);
+  }
+}

@@ -1,9 +1,10 @@
 import type { FC } from 'react'
+import { Link } from "react-router-dom";
 import '../index.css'
 
 const Home: FC = () => {
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100">
+        <div className="background-primary">
             <header className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur border-b border-white/10">
                 <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
                     <span className="text-lg font-semibold tracking-tight">
@@ -11,12 +12,16 @@ const Home: FC = () => {
                     </span>
 
                     <nav className="flex items-center gap-4">
+                        <Link to="/login">
                         <a className="text-sm text-slate-300 hover:text-white transition">
                             Log In
                         </a>
+                        </Link>
+                        <Link to="/signup">
                         <a className="px-4 py-2 rounded-full bg-indigo-500 text-white font-medium hover:bg-indigo-400 transition">
                             Sign Up
                         </a>
+                        </Link>
                     </nav>
                 </div>
             </header>
@@ -38,9 +43,11 @@ const Home: FC = () => {
                             </p>
 
                             <div className="mt-10 flex gap-4">
+                                <Link to="/signup">
                                 <a className="px-6 py-3 rounded-full bg-indigo-500 text-white font-medium hover:bg-indigo-400 transition">
                                     Get started free
                                 </a>
+                                </Link>
                             </div>
                         </div>
                     </div>
