@@ -58,12 +58,6 @@ const Signup: FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const target = e.target as typeof e.target & {
-            email: { value: string };
-            password: { value: string };
-        };
-        const email = target.email.value;
-        const password = target.password.value;
 
         if (!validateForm()) {
             return;
