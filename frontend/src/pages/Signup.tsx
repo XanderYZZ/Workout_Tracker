@@ -92,19 +92,19 @@ const Signup: FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="background-primary flex items-center justify-center">
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    <h2 className="text-3xl font-bold text-gray-100 mb-2">
                         Create your account
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-gray-800">
                         Join Workout Tracker and start tracking your workouts
                     </p>
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-xl p-8">
-                    <form className="space-y-6" onSubmit={handleSubmit}>
+                    <form className="space-y-2" onSubmit={handleSubmit}>
                         <div>
                             <label htmlFor="username" className="text-left block text-sm font-medium text-gray-700 mb-2">
                                 Username
@@ -115,8 +115,8 @@ const Signup: FC = () => {
                                 type="text"
                                 value={formData.username}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                    }`}
+                                className={`text-gray-700 w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                    }`} 
                                 placeholder="Choose a username"
                             />
                             {errors.username && (
@@ -134,7 +134,7 @@ const Signup: FC = () => {
                                 type="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                className={`text-gray-700 w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                     }`}
                                 placeholder="Enter your email"
                             />
@@ -153,7 +153,7 @@ const Signup: FC = () => {
                                 type="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                className={`text-gray-700 w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                     }`}
                                 placeholder="Create a password"
                             />
@@ -172,7 +172,7 @@ const Signup: FC = () => {
                                 type="password"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                className={`text-gray-700 w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                     }`}
                                 placeholder="Confirm your password"
                             />
@@ -202,7 +202,7 @@ const Signup: FC = () => {
                             )}
                         </button>
 
-                        <div className="text-center">
+                        <div className="text-center mt-[16px]">
                             <p className="text-sm text-gray-600">
                                 Already have an account?{' '}
                                 <Link

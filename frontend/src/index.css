@@ -14,8 +14,9 @@
 
 @layer utilities {
   .background-primary {
+    min-width: 100vh;
     min-height: 100vh;
-    background-color: rgb(2 6 23);
-    color: rgb(241 245 249);
+    background-color: rgb(146, 197, 207);
+    color: rgb(244, 246, 247);
   }
 }
