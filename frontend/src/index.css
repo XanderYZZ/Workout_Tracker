@@ -15,21 +15,8 @@
 @layer utilities {
   .background-primary {
     min-height: 100vh;
-    background: linear-gradient(to bottom right, #eff6ff, #e0e7ff);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 1rem;
-
-    @media (min-width: 640px) {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
-
-    @media (min-width: 1024px) {
-      padding-left: 2rem;
-      padding-right: 2rem;
-    }
+    min-width: 100vh;
+    background: linear-gradient(to bottom right, #eff6ff, #e0e7ffdb);
   }
 }
 

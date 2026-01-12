@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { apiClient } from "../lib/apiclient";
 import { Calendar, Plus, Edit2, Trash2, X, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { Navbar } from "../components/navbar.tsx";
 
 const Workouts: FC = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -176,7 +177,8 @@ const Workouts: FC = () => {
 
   return (
     <div className="background-primary">
-      <div className="min-w-[40vw] max-w-[70vw] mx-auto">
+      <Navbar></Navbar>
+      <div className="min-w-[40vw] max-w-[70vw] mx-auto pt-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
