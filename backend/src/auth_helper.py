@@ -6,6 +6,8 @@ import models
 import jwt 
 import datetime
 import config
+import secrets
+import hashlib
 
 SECRET_KEY = config.SECRET_KEY
 ph = PasswordHasher()
@@ -21,7 +23,13 @@ def VerifyPassword(plain_password: str, hashed_password: str) -> bool:
     except VerifyMismatchError:
         return False
     
-def CreateJWTToken(user_id: str, email: str) -> str:
+def CreateRefreshToken() -> str:
+    raw_token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+
+    return raw_token, token_hash
+    
+def CreateAccessToken(user_id: str, email: str) -> str:
     payload = {
         "sub": user_id,       
         "email": email,       
@@ -30,6 +38,45 @@ def CreateJWTToken(user_id: str, email: str) -> str:
     }
 
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+def CreateTokenPair(user_id: str, email: str) -> tuple:
+    """Create both access and refresh tokens"""
+    access_token = CreateAccessToken(user_id, email)
+    
+    # Generate refresh token
+    raw_refresh_token, refresh_token_hash = CreateRefreshToken()
+    
+    # Store refresh token hash in database with expiration (30 days)
+    expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
+    database.StoreRefreshToken(user_id, refresh_token_hash, expires_at, email)
+    
+    return access_token, raw_refresh_token
+
+def ValidateRefreshTokenAndGetUser(raw_refresh_token: str) -> tuple:
+    """Validate refresh token and return user_id and email if valid"""
+    token_hash = hashlib.sha256(raw_refresh_token.encode()).hexdigest()
+    result = database.GetRefreshTokenInfo(token_hash)
+    if result is None:
+        raise ValueError("Refresh token is invalid, expired, or revoked")
+    return result  # Returns (user_id, email)
+
+def RefreshAccessToken(raw_refresh_token: str) -> tuple:
+    """Generate new access token and refresh token pair from valid refresh token"""
+    user_id, email = ValidateRefreshTokenAndGetUser(raw_refresh_token)
+    
+    # Revoke old refresh token
+    RevokeRefreshToken(raw_refresh_token)
+    
+    # Create new token pair
+    new_access_token, new_refresh_token = CreateTokenPair(user_id, email)
+    
+    return new_access_token, new_refresh_token
+
+def RevokeRefreshToken(raw_refresh_token: str) -> bool:
+    """Revoke a specific refresh token"""
+    token_hash = hashlib.sha256(raw_refresh_token.encode()).hexdigest()
+    return database.RevokeRefreshToken(token_hash)
+
 
 async def GetCurrentUser(authorization : str = Header(...)) -> models.CurrentUser:
     """

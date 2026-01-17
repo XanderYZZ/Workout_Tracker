@@ -144,3 +144,67 @@ def GetWorkoutsThatContainExercise(user_id : str, exercise_name : str) -> Option
         results.append(workout)
     
     return results
+
+def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str) -> str:
+    refresh_tokens = GetDb()["refresh_tokens"]
+
+    result = refresh_tokens.insert_one({
+        "user_id": user_id,
+        "email": email,
+        "token_hash": token_hash,
+        "expires_at": expires_at,
+        "created_at": datetime.now(timezone.utc),
+        "is_revoked": False
+    })
+
+    return str(result.inserted_id)
+
+def GetRefreshTokenInfo(token_hash: str) -> Optional[tuple]:
+    refresh_tokens = GetDb()["refresh_tokens"]
+    token = refresh_tokens.find_one({
+        "token_hash": token_hash,
+        "is_revoked": False,
+        "expires_at": {"$gt": datetime.now(timezone.utc)}
+    })
+
+    if token:
+        return (token["user_id"], token["email"])
+    
+    return None
+
+def ValidateRefreshToken(user_id: str, token_hash: str) -> bool:
+    refresh_tokens = GetDb()["refresh_tokens"]
+    token = refresh_tokens.find_one({
+        "user_id": user_id,
+        "token_hash": token_hash,
+        "is_revoked": False,
+        "expires_at": {"$gt": datetime.now(timezone.utc)}
+    })
+
+    return token is not None
+
+def RevokeRefreshToken(token_hash: str) -> bool:
+    refresh_tokens = GetDb()["refresh_tokens"]
+    result = refresh_tokens.update_one(
+        {"token_hash": token_hash},
+        {"$set": {"is_revoked": True}}
+    )
+
+    return result.modified_count > 0
+
+def RevokeAllUserRefreshTokens(user_id: str) -> int:
+    refresh_tokens = GetDb()["refresh_tokens"]
+    result = refresh_tokens.update_many(
+        {"user_id": user_id, "is_revoked": False},
+        {"$set": {"is_revoked": True}}
+    )
+
+    return result.modified_count
+
+def CleanupExpiredRefreshTokens() -> int:
+    refresh_tokens = GetDb()["refresh_tokens"]
+    result = refresh_tokens.delete_many({
+        "expires_at": {"$lt": datetime.now(timezone.utc)}
+    })
+    
+    return result.deleted_count

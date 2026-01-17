@@ -6,7 +6,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
   isLoading: boolean;
   signup: (formData: any) => Promise<void>;
   login: (formData: any) => Promise<void>;

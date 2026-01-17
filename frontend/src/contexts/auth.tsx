@@ -6,19 +6,19 @@ import { useNavigate } from 'react-router-dom';
 const base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 
 const isAuthenticatedDefault = () => {
-  const token = localStorage.getItem("token");
+  const accessToken = localStorage.getItem("accessToken");
 
-  return !!token;
+  return !!accessToken;
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  token: null,
-  setIsLoading: () => {},
-  setErrors: () => {},
-  signup: async () => {},
-  login: async () => {},
-  logout: async () => {},
+  accessToken: null,
+  setIsLoading: () => { },
+  setErrors: () => { },
+  signup: async () => { },
+  login: async () => { },
+  logout: async () => { },
   isLoading: false,
   errors: {},
   isAuthenticated: isAuthenticatedDefault,
@@ -26,13 +26,13 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem("accessToken"));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const isAuthenticated = () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
     return !!token;
   };
 
@@ -45,23 +45,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    if (token) {
-      const decoded = parseJwt(token);
+    if (accessToken) {
+      const decoded = parseJwt(accessToken);
       if (decoded) {
         setUser({
-          _id: decoded.user_id,
+          _id: decoded.sub,
           email: decoded.email,
           exp: decoded.exp,
         });
       } else {
         setUser(null);
       }
-      localStorage.setItem("token", token);
+      localStorage.setItem("accessToken", accessToken);
     } else {
       setUser(null);
-      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
     }
-  }, [token]);
+  }, [accessToken]);
 
   const validateForm = (formData: any): boolean => {
     const newErrors: Record<string, string> = {};
@@ -76,11 +76,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(base_url + "/login", formData);
-      const newToken = response.data.token;
-      const email = response.data.email;
-      setToken(newToken);
-      setUser({ email: email });
+      const response = await axios.post(base_url + "/auth/login", formData);
+      const newAccessToken = response.data.access_token;
+      const newRefreshToken = response.data.refresh_token;
+
+      setAccessToken(newAccessToken);
+      localStorage.setItem("refreshToken", newRefreshToken);
+
       toast.success("Login successful!");
       navigate('/workouts');
     } catch (error: any) {
@@ -97,12 +99,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const password = formData['password'];
       const email = formData['email'];
-      const result = await axios.post(base_url + "/signup", {
+      const result = await axios.post(base_url + "/auth/signup", {
         email,
         password,
       });
-      const newToken = result.data.token;
-      setToken(newToken);
+      const newAccessToken = result.data.access_token;
+      const newRefreshToken = result.data.refresh_token;
+
+      setAccessToken(newAccessToken);
+      localStorage.setItem("refreshToken", newRefreshToken);
+
       toast.success("Signup successful!");
       navigate('/workouts');
     } catch (error: any) {
@@ -114,18 +120,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const logout = async () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem("token");
-    toast("Logged out");
-    navigate('/');
+    try {
+      if (accessToken) {
+        await axios.post(base_url + "/auth/logout", {}, {
+          headers: {
+            "Authorization": `Bearer ${accessToken}`
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setAccessToken(null);
+      setUser(null);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      toast.success("Logged out");
+      navigate('/');
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        token,
+        accessToken,
         signup,
         login,
         logout,
