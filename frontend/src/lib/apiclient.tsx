@@ -4,6 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 export const apiClient: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
+    withCredentials: true,  // Enable cookie sending
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -25,32 +26,22 @@ apiClient.interceptors.response.use(
             originalRequest.retry = true;
 
             try {
-                const refreshToken = localStorage.getItem("refreshToken");
-                if (!refreshToken) {
-                    localStorage.removeItem("accessToken");
-                    localStorage.removeItem("refreshToken");
-                    window.location.href = "/login";
-
-                    return Promise.reject(error);
-                }
-
-                const refreshResponse = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-                    refresh_token: refreshToken,
+                // Refresh token is now in HTTP-only cookie, no need to manually get it
+                const refreshResponse = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
+                    withCredentials: true,
                 });
 
-                const { access_token, refresh_token: newRefreshToken } = refreshResponse.data;
+                const { access_token } = refreshResponse.data;
 
                 localStorage.setItem("accessToken", access_token);
-                localStorage.setItem("refreshToken", newRefreshToken);
 
                 originalRequest.headers.Authorization = `Bearer ${access_token}`;
 
                 return apiClient(originalRequest);
             } catch (refreshError) {
                 localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
                 window.location.href = "/login";
-                
+
                 return Promise.reject(refreshError);
             }
         }

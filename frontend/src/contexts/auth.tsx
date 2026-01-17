@@ -76,12 +76,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(base_url + "/login", formData);
+      const response = await axios.post(base_url + "/login", formData, {
+        withCredentials: true,  // Enable cookies
+      });
       const newAccessToken = response.data.access_token;
-      const newRefreshToken = response.data.refresh_token;
 
       setAccessToken(newAccessToken);
-      localStorage.setItem("refreshToken", newRefreshToken);
 
       toast.success("Login successful!");
       navigate('/workouts');
@@ -102,12 +102,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const result = await axios.post(base_url + "/signup", {
         email,
         password,
+      }, {
+        withCredentials: true,  // Enable cookies
       });
       const newAccessToken = result.data.access_token;
-      const newRefreshToken = result.data.refresh_token;
 
       setAccessToken(newAccessToken);
-      localStorage.setItem("refreshToken", newRefreshToken);
 
       toast.success("Signup successful!");
       navigate('/workouts');
@@ -125,7 +125,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         await axios.post(base_url + "/logout", {}, {
           headers: {
             "Authorization": `Bearer ${accessToken}`
-          }
+          },
+          withCredentials: true  // Enable cookies for logout
         });
       }
     } catch (error) {
@@ -134,7 +135,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setAccessToken(null);
       setUser(null);
       localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
       toast.success("Logged out");
       navigate('/');
     }
