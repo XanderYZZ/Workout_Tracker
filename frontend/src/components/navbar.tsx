@@ -16,35 +16,44 @@ export const Navbar = () => {
 
                 <nav className="flex items-center gap-4">
                     {(user && Object.keys(user).length != 0) ? <>
-                    {(pathname != "/workouts") ? <>
-                    <Link to="/workouts">
+                        {(pathname != "/workouts") ? <>
+                            <Link to="/workouts">
+                                <button
+                                    className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                >
+                                    Workouts
+                                </button>
+                            </Link>
+                        </> : <></>}
+                        {(pathname != "/reports") ? <>
+                            <Link to="/reports">
+                                <button
+                                    className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                >
+                                    Reports
+                                </button>
+                            </Link>
+                        </> : <></>}
                         <button
-                        className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                    >
-                        Workouts
-                    </button> 
-                    </Link>
-                    </> : <></>}
-                    <button
-                        onClick={logout}
-                        className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                    >
-                        Logout
-                    </button> 
+                            onClick={logout}
+                            className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                        >
+                            Logout
+                        </button>
                     </>
 
-                    // For if the user is not logged in.
-                    : <><Link
-                        to="/login"
-                        className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                    >
-                        Login
-                    </Link>
-                    <Link to="/signup">
-                    <a className="text-white-900 px-4 py-2 rounded-full bg-indigo-500 font-medium hover:bg-indigo-400 transition">
-                        Sign Up
-                    </a>
-                    </Link></>}
+                        // For if the user is not logged in.
+                        : <><Link
+                            to="/login"
+                            className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                        >
+                            Login
+                        </Link>
+                            <Link to="/signup">
+                                <a className="text-white-900 px-4 py-2 rounded-full bg-indigo-500 font-medium hover:bg-indigo-400 transition">
+                                    Sign Up
+                                </a>
+                            </Link></>}
                 </nav>
             </div>
         </header>

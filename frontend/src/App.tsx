@@ -2,13 +2,14 @@ import {
   createBrowserRouter,
   RouterProvider,
   Outlet,
-} from "react-router-dom"; 
+} from "react-router-dom";
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/auth'
 import Home from './pages/Home';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Workouts from './pages/Workouts';
+import Reports from './pages/Reports';
 import ProtectedRoute from './wrappers/protected_route';
 
 function Layout() {
@@ -43,6 +44,14 @@ function App() {
           element: (
             <ProtectedRoute>
               <Workouts />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "reports",
+          element: (
+            <ProtectedRoute>
+              <Reports />
             </ProtectedRoute>
           ),
         }
