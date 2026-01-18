@@ -87,6 +87,22 @@ def GetWorkoutsForUser(user_id: str,
     
     return results
 
+def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
+    workouts = GetDb()["workouts"]
+    
+    start_of_day = datetime(date.year, date.month, date.day, tzinfo=timezone.utc)
+    end_of_day = datetime(date.year, date.month, date.day, 23, 59, 59, 999999, tzinfo=timezone.utc)
+    
+    count = workouts.count_documents({
+        "user_id": user_id,
+        "scheduled_date": {
+            "$gte": start_of_day, 
+            "$lte": end_of_day
+        }
+    })
+    
+    return count
+
 def UpdateWorkout(workout_id: str, user_id: str, update_data: Dict) -> bool:
     workouts = GetDb()["workouts"]
 

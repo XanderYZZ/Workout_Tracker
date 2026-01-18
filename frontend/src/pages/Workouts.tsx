@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { apiClient } from "../lib/apiclient";
-import { Calendar, Plus, Edit2, Trash2, X, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar, Plus, Edit2, Trash2, X, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { Navbar } from "../components/navbar.tsx";
 
@@ -12,7 +12,10 @@ const Workouts: FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showCalendarPicker, setShowCalendarPicker] = useState(false);
+  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
+
   const [formData, setFormData] = useState<WorkoutFormData>({
     name: '',
     scheduled_date: new Date().toISOString().slice(0, 16),
@@ -20,18 +23,23 @@ const Workouts: FC = () => {
     comments: ''
   });
 
+  const handleError = (err: any) => {
+    const errorMessage = err.response?.data?.detail || err.message || 'An error occurred';
+    setError(errorMessage);
+  }
+
   const fetchWorkouts = async () => {
     try {
       setLoading(true);
       const response = await apiClient.get(`/workouts/`);
-      
+
       if (response.status !== 200) throw new Error('Failed to fetch workouts');
-      
+
       const data = response.data;
       setWorkouts(data);
       setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (err : any) {
+      handleError(err);
     } finally {
       setLoading(false);
     }
@@ -55,8 +63,8 @@ const Workouts: FC = () => {
       await fetchWorkouts();
       resetForm();
       setIsCreating(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (err : any) {
+      handleError(err);
     }
   };
 
@@ -66,34 +74,34 @@ const Workouts: FC = () => {
         scheduled_date: new Date(formData.scheduled_date).toISOString(),
         exercises: formData.exercises,
         comments: formData.comments
-      });   
+      });
 
       if (response.status !== 200) throw new Error('Failed to update workout');
 
       await fetchWorkouts();
       resetForm();
       setEditingId(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (err : any) {
+      handleError(err);
     }
   };
 
   const deleteWorkout = async (workoutId: string) => {
     const result = await Swal.fire({
-        title: "Are you sure you want to delete this workout?",
-        text: "This cannot be undone.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        cancelButtonText: "No",
-        confirmButtonColor: "#499c59ff",
-        cancelButtonColor: "#cc3e41ff",
-        background: '#323234ff',
-        color: '#f8fafc',
+      title: "Are you sure you want to delete this workout?",
+      text: "This cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#499c59ff",
+      cancelButtonColor: "#cc3e41ff",
+      background: '#323234ff',
+      color: '#f8fafc',
     });
 
     if (!result.isConfirmed) {
-        return;
+      return;
     }
 
     try {
@@ -102,8 +110,8 @@ const Workouts: FC = () => {
       if (response.status !== 204) throw new Error('Failed to delete workout');
 
       await fetchWorkouts();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (err : any) {
+      handleError(err);
     }
   };
 
@@ -121,7 +129,7 @@ const Workouts: FC = () => {
     const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
       .toISOString()
       .slice(0, 16);
-    
+
     setFormData({
       name: workout.name,
       scheduled_date: localDateTime,
@@ -167,6 +175,68 @@ const Workouts: FC = () => {
     });
   };
 
+  const getWorkoutsForDate = (date: Date) => {
+    return workouts.filter((workout) => {
+      const workoutDate = new Date(workout.scheduled_date);
+      return (
+        workoutDate.getFullYear() === date.getFullYear() &&
+        workoutDate.getMonth() === date.getMonth() &&
+        workoutDate.getDate() === date.getDate()
+      );
+    });
+  };
+
+  const formatDisplayDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const goToPreviousDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() - 1);
+    setSelectedDate(newDate);
+  };
+
+  const goToNextDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + 1);
+    setSelectedDate(newDate);
+  };
+
+  const selectDateFromCalendar = (day: number) => {
+    const newDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), day);
+    setSelectedDate(newDate);
+    setShowCalendarPicker(false);
+  };
+
+  const goToTodayInCalendar = () => {
+    setCalendarDate(new Date());
+  };
+
+  const goToPreviousMonth = () => {
+    const newDate = new Date(calendarDate);
+    newDate.setMonth(newDate.getMonth() - 1);
+    setCalendarDate(newDate);
+  };
+
+  const goToNextMonth = () => {
+    const newDate = new Date(calendarDate);
+    newDate.setMonth(newDate.getMonth() + 1);
+    setCalendarDate(newDate);
+  };
+
   if (loading && workouts.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -179,23 +249,140 @@ const Workouts: FC = () => {
     <div className="background-primary">
       <Navbar></Navbar>
       <div className="min-w-[40vw] max-w-[70vw] mx-auto pt-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Workouts</h1>
-            <p className="text-gray-600 mt-1">Workouts scheduled: {workouts.length}</p>
+        {/* Header with Date Navigation */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">My Workouts</h1>
+              <p className="text-gray-600 mt-1">Workouts scheduled: {workouts.length}</p>
+            </div>
+            <button
+              onClick={() => {
+                resetForm();
+                setIsCreating(true);
+                setEditingId(null);
+              }}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus size={20} />
+              New Workout
+            </button>
           </div>
-          <button
-            onClick={() => {
-              resetForm();
-              setIsCreating(true);
-              setEditingId(null);
-            }}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus size={20} />
-            New Workout
-          </button>
+
+          {/* Date Navigation Section */}
+          <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={goToPreviousDay}
+                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ChevronLeft size={24} />
+              </button>
+
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-gray-900">
+                    {selectedDate.getDate()}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short' })}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowCalendarPicker(!showCalendarPicker)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                >
+                  <Calendar size={20} />
+                  Pick Date
+                </button>
+              </div>
+
+              <button
+                onClick={goToNextDay}
+                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </div>
+
+            {/* Calendar Picker Modal */}
+            {showCalendarPicker && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <button
+                      onClick={goToPreviousMonth}
+                      className="p-1 text-gray-600 hover:bg-gray-200 rounded"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </h3>
+                    <button
+                      onClick={goToNextMonth}
+                      className="p-1 text-gray-600 hover:bg-gray-200 rounded"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+
+                  {/* Days of week header */}
+                  <div className="grid grid-cols-7 gap-2 mb-2">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                      <div key={day} className="text-center text-sm font-medium text-gray-600">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Calendar days */}
+                  <div className="grid grid-cols-7 gap-2">
+                    {Array.from({ length: getFirstDayOfMonth(calendarDate) }).map((_, i) => (
+                      <div key={`empty-${i}`} className="aspect-square"></div>
+                    ))}
+                    {Array.from({ length: getDaysInMonth(calendarDate) }).map((_, i) => {
+                      const day = i + 1;
+                      const date = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), day);
+                      const isSelected =
+                        selectedDate.getDate() === day &&
+                        selectedDate.getMonth() === calendarDate.getMonth() &&
+                        selectedDate.getFullYear() === calendarDate.getFullYear();
+                      const isToday =
+                        new Date().getDate() === day &&
+                        new Date().getMonth() === calendarDate.getMonth() &&
+                        new Date().getFullYear() === calendarDate.getFullYear();
+                      const hasWorkouts = getWorkoutsForDate(date).length > 0;
+
+                      return (
+                        <button
+                          key={day}
+                          onClick={() => selectDateFromCalendar(day)}
+                          className={`aspect-square rounded-lg font-medium text-sm flex items-center justify-center transition-colors ${isSelected
+                            ? 'bg-blue-600 text-white'
+                            : isToday
+                              ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                              : hasWorkouts
+                                ? 'bg-green-50 text-gray-900 border border-green-300'
+                                : 'text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    onClick={goToTodayInCalendar}
+                    className="mt-4 w-full py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+                  >
+                    Today
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {error && (
@@ -262,7 +449,7 @@ const Workouts: FC = () => {
                     Add Exercise
                   </button>
                 </div>
-                
+
                 {formData.exercises.length > 0 && (
                   <div className="flex gap-2 mb-2">
                     <label className="text-sm font-medium text-gray-700 w-[16vw]">Name</label>
@@ -272,7 +459,7 @@ const Workouts: FC = () => {
                     <div className="w-[40px]"></div>
                   </div>
                 )}
-                
+
                 {formData.exercises.map((exercise, index) => (
                   <div key={index} className="flex gap-2 mb-2">
                     <input
@@ -350,82 +537,87 @@ const Workouts: FC = () => {
         )}
 
         {/* Workouts List */}
-        <div className="space-y-4">
-          {workouts.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-12 text-center">
-              <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No workouts yet</h3>
-              <p className="text-gray-600 mb-4">Create your first workout to get started!</p>
-            </div>
-          ) : (
-            workouts.map((workout) => (
-              <div key={workout.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900">{workout.name}</h3>
-                      <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
-                        <Calendar size={16} />
-                        {formatDate(workout.scheduled_date)}
-                      </div>
-                      {workout.exercises && workout.exercises.length > 0 && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          {workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setExpandedId(expandedId === workout.id ? null : workout.id)}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                      >
-                        {expandedId === workout.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                      </button>
-                      <button
-                        onClick={() => startEdit(workout)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      >
-                        <Edit2 size={20} />
-                      </button>
-                      <button
-                        onClick={() => deleteWorkout(workout.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {expandedId === workout.id && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      {workout.exercises && workout.exercises.length > 0 && (
-                        <div className="mb-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">Exercises</h4>
-                          <div className="space-y-2">
-                            {workout.exercises.map((exercise, idx) => (
-                              <div key={idx} className="bg-gray-50 rounded p-3 text-sm">
-                                <div className="font-medium text-gray-900">{exercise.name}</div>
-                                <div className="text-gray-600 mt-1">
-                                  {exercise.sets} sets × {exercise.reps} reps
-                                  {exercise.weight > 0 && ` @ ${exercise.weight} lbs`}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {workout.comments && (
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">Comments</h4>
-                          <p className="text-sm text-gray-600 bg-gray-50 rounded p-3">{workout.comments}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Workouts for {formatDisplayDate(selectedDate)}
+          </h2>
+          <div className="space-y-4">
+            {getWorkoutsForDate(selectedDate).length === 0 ? (
+              <div className="bg-white rounded-lg shadow-md p-12 text-center">
+                <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No workouts today</h3>
+                <p className="text-gray-600 mb-4">Create a new workout or select a different date!</p>
               </div>
-            ))
-          )}
+            ) : (
+              getWorkoutsForDate(selectedDate).map((workout) => (
+                <div key={workout.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900">{workout.name}</h3>
+                        <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                          <Calendar size={16} />
+                          {formatDate(workout.scheduled_date)}
+                        </div>
+                        {workout.exercises && workout.exercises.length > 0 && (
+                          <p className="text-sm text-gray-500 mt-1">
+                            {workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setExpandedId(expandedId === workout.id ? null : workout.id)}
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                          {expandedId === workout.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        </button>
+                        <button
+                          onClick={() => startEdit(workout)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
+                          <Edit2 size={20} />
+                        </button>
+                        <button
+                          onClick={() => deleteWorkout(workout.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {expandedId === workout.id && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        {workout.exercises && workout.exercises.length > 0 && (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium text-gray-700 mb-2">Exercises</h4>
+                            <div className="space-y-2">
+                              {workout.exercises.map((exercise, idx) => (
+                                <div key={idx} className="bg-gray-50 rounded p-3 text-sm">
+                                  <div className="font-medium text-gray-900">{exercise.name}</div>
+                                  <div className="text-gray-600 mt-1">
+                                    {exercise.sets} sets × {exercise.reps} reps
+                                    {exercise.weight > 0 && ` @ ${exercise.weight} lbs`}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {workout.comments && (
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-700 mb-2">Comments</h4>
+                            <p className="text-sm text-gray-600 bg-gray-50 rounded p-3">{workout.comments}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

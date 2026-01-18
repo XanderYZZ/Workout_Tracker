@@ -7,6 +7,7 @@ import auth_helper
 from datetime import datetime, timezone
 
 router = APIRouter(tags=["workouts"], prefix="/workouts")
+MAXIMUM_WORKOUTS_PER_DAY = 5
 
 # CREATE
 @router.post("/", response_model=models.WorkoutResponse, status_code=status.HTTP_201_CREATED)
@@ -24,6 +25,12 @@ async def CreateWorkout(
 
     if workout_dict["scheduled_date"].tzinfo is None:
         workout_dict["scheduled_date"] = workout_dict["scheduled_date"].replace(tzinfo=timezone.utc)
+
+    # I added this for some prevention of spamming workouts on a certain date.
+    num_on_date = database.GetNumberOfWorkoutsForUserOnDate(current_user.user_id, workout_dict["scheduled_date"])
+    
+    if num_on_date >= MAXIMUM_WORKOUTS_PER_DAY:
+        raise HTTPException(status_code=400, detail=f"Maximum of {MAXIMUM_WORKOUTS_PER_DAY} workouts per day exceeded.")
 
     workout_id = database.CreateWorkout(workout_dict)
     created_workout = database.GetWorkoutById(workout_id, current_user.user_id)
