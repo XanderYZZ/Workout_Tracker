@@ -82,6 +82,7 @@ const Workouts: FC = () => {
   const updateWorkout = async (workoutId: string) => {
     try {
       const response = await apiClient.put(`/workouts/${workoutId}`, {
+        name: formData.name,
         scheduled_date: new Date(formData.scheduled_date).toISOString(),
         exercises: formData.exercises,
         comments: formData.comments

@@ -9,10 +9,13 @@ import config
 import secrets
 import hashlib
 import uuid
+import os
 
 SECRET_KEY = config.SECRET_KEY
 ph = PasswordHasher()
 ALGORITHM = "HS256"
+ACCESS_TOKEN_MINUTES = os.getenv("ACCESS_TOKEN_MINUTES")
+REFRESH_TOKEN_DAYS = os.getenv("REFRESH_TOKEN_DAYS")
 
 def IsPasswordStrong(password: str) -> bool:
     if len(password) < 8:
@@ -53,7 +56,7 @@ def CreateAccessToken(user_id: str, email: str) -> str:
         "sub": user_id,       
         "email": email,       
         "iat": datetime.datetime.now(datetime.timezone.utc),
-        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=15)
+        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=ACCESS_TOKEN_MINUTES)
     }
 
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
@@ -65,7 +68,7 @@ def CreateTokenPair(user_id: str, email: str, device_fingerprint: str, family_id
     if family_id is None:
         family_id = str(uuid.uuid4())
     
-    expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
+    expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=REFRESH_TOKEN_DAYS)
     database.StoreRefreshToken(
         user_id, 
         refresh_token_hash, 
@@ -129,7 +132,7 @@ async def GetCurrentUser(authorization : str = Header(...)) -> models.CurrentUse
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
         email: str = payload.get("email")
-        
+
         if user_id is None or email is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

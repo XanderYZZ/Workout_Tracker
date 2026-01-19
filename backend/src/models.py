@@ -40,6 +40,7 @@ class WorkoutsThatContainExerciseReport(BaseModel):
     model_config = {"from_attributes": True}
 
 class WorkoutUpdate(BaseModel):
+    name: str
     scheduled_date: Optional[AwareDatetime] = None
     comments: Optional[str] = None
     exercises: Optional[List[ExerciseInWorkout]] = None

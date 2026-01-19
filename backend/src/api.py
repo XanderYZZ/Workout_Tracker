@@ -19,8 +19,8 @@ async def rate_limit_handler(request, exc):
     )
 
 origins = [
-    "http://localhost:5173",  # Dev frontend
-    "http://127.0.0.1:5173",
+    "http://localhost:5173",  # Development frontend
+    "http://localhost:8000",  # Development backend
 ]
 
 app.add_middleware(
@@ -38,3 +38,7 @@ app.include_router(reports.router)
 @app.get("/")
 async def root():
     return {"Detail": "This is a workout tracker."}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("api:app", host="localhost", port=8000, reload=True)

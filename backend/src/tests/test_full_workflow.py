@@ -19,12 +19,12 @@ def test_full_workflow():
     password = "Thetest123!"
 
     # Signup
-    response = client.post("/signup", json={"email": email, "password": password})
+    response = client.post("/auth/signup", json={"email": email, "password": password})
     access_token = ""
     if response.status_code == 201: 
         access_token = response.json()["access_token"]
     else:
-        response = client.post("/login", json={"email": email, "password": password})
+        response = client.post("/auth/login", json={"email": email, "password": password})
         assert response.status_code == 200
         access_token = response.json()["access_token"]
 

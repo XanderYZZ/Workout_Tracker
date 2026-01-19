@@ -6,18 +6,20 @@ import os
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-router = APIRouter(tags=["auth"])
+router = APIRouter(tags=["auth"], prefix="/auth")
 limiter = Limiter(key_func=get_remote_address)
+REFRESH_TOKEN_DAYS = os.getenv("REFRESH_TOKEN_DAYS")
 
 def ResponseSetCookieHelper(response: Response, refresh_token: str): 
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=True,
-        samesite="strict",
-        path="/auth/refresh",
-        max_age=2592000
+        secure=os.getenv("ENVIRONMENT") == "production",
+        samesite="lax",
+        path="/",
+        max_age=REFRESH_TOKEN_DAYS * 24 * 60 * 60,
+        domain=None
     )
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
@@ -67,6 +69,7 @@ async def Login(request: Request, user: models.UserCreate, response: Response):
 @limiter.limit("5/minute")
 async def Refresh(request: Request, response: Response):
     refresh_token = request.cookies.get("refresh_token")
+
     if not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -91,15 +94,15 @@ async def Refresh(request: Request, response: Response):
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")
-async def Logout(request: Request, current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser), response: Response = None):
+async def Logout(request: Request, response: Response, current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser)):
     database.RevokeAllUserRefreshTokens(current_user.user_id)
     
     if response:
         response.delete_cookie(
             key="refresh_token",
             httponly=True,
-            secure=True,
-            samesite="strict"
+            secure=os.getenv("ENVIRONMENT") == "production",
+            samesite="lax"
         )
 
     return {"message": "Logged out successfully"}

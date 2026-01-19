@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 
 const isAuthenticatedDefault = () => {
-  const accessToken = localStorage.getItem("accessToken");
+  const accessToken = localStorage.getItem("access_token");
 
   return !!accessToken;
 };
@@ -26,13 +26,13 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem("accessToken"));
+  const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem("access_token"));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const isAuthenticated = () => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("access_token");
     return !!token;
   };
 
@@ -56,10 +56,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } else {
         setUser(null);
       }
-      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("access_token", accessToken);
     } else {
       setUser(null);
-      localStorage.removeItem("accessToken");
+      localStorage.removeItem("access_token");
     }
   }, [accessToken]);
 
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(base_url + "/login", formData, {
+      const response = await axios.post(base_url + "/auth/login", formData, {
         withCredentials: true,  // Enable cookies
       });
       const newAccessToken = response.data.access_token;
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const password = formData['password'];
       const email = formData['email'];
-      const result = await axios.post(base_url + "/signup", {
+      const result = await axios.post(base_url + "/auth/signup", {
         email,
         password,
       }, {
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async () => {
     try {
       if (accessToken) {
-        await axios.post(base_url + "/logout", {}, {
+        await axios.post(base_url + "/auth/logout", {}, {
           headers: {
             "Authorization": `Bearer ${accessToken}`
           },
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } finally {
       setAccessToken(null);
       setUser(null);
-      localStorage.removeItem("accessToken");
+      localStorage.removeItem("access_token");
       toast.success("Logged out");
       navigate('/');
     }
