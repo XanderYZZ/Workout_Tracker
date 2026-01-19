@@ -14,8 +14,8 @@ import os
 SECRET_KEY = config.SECRET_KEY
 ph = PasswordHasher()
 ALGORITHM = "HS256"
-ACCESS_TOKEN_MINUTES = os.getenv("ACCESS_TOKEN_MINUTES")
-REFRESH_TOKEN_DAYS = os.getenv("REFRESH_TOKEN_DAYS")
+ACCESS_TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_MINUTES"))
+REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS"))
 
 def IsPasswordStrong(password: str) -> bool:
     if len(password) < 8:

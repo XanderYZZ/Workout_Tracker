@@ -8,7 +8,7 @@ from slowapi.util import get_remote_address
 
 router = APIRouter(tags=["auth"], prefix="/auth")
 limiter = Limiter(key_func=get_remote_address)
-REFRESH_TOKEN_DAYS = os.getenv("REFRESH_TOKEN_DAYS")
+REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS"))
 
 def ResponseSetCookieHelper(response: Response, refresh_token: str): 
     response.set_cookie(
