@@ -175,6 +175,27 @@ def GetWorkoutsThatContainExercise(user_id : str, exercise_name : str) -> Option
     
     return results
 
+def GetAllWorkoutsInPeriod(user_id: str, start_date: datetime, end_date: datetime) -> List[Dict]:
+    workouts = GetDb()["workouts"]
+    cursor = workouts.find({
+        "user_id": user_id,
+        "scheduled_date": {
+            "$gte": start_date,
+            "$lte": end_date
+        }
+    }).sort("scheduled_date", -1)
+
+    results = []
+
+    for doc in cursor:
+        doc = MakeDatetimeAware(doc)
+        doc["id"] = str(doc["_id"])
+        del doc["_id"] 
+        
+        results.append(doc)
+    
+    return results
+
 def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str, family_id: Optional[str] = None, device_fingerprint: Optional[str] = None, parent_token_id: Optional[str] = None) -> str:
     refresh_tokens = GetDb()["refresh_tokens"]
 

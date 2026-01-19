@@ -53,3 +53,12 @@ class AllExercisesReport(BaseModel):
 
 class ExerciseRequest(BaseModel):
     exercise: str
+
+class VolumeOverPeriodRequest(BaseModel):
+    start_date: AwareDatetime
+    end_date: AwareDatetime
+    exercise: str | None = None
+
+class VolumeOverPeriodReport(BaseModel):
+    total_volume: float # It's a float since the weight can be a float.
+    exercise: str # None gets converted to ""

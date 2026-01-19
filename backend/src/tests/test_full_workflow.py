@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 import sys
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import random
 
 grandparent_dir = Path(__file__).resolve().parents[1]
@@ -12,24 +12,25 @@ from api import app
 client = TestClient(app)
 
 def test_full_workflow():
-    print("\n=== TEST STARTED AT:", datetime.now(timezone.utc).isoformat(), "===\n")
+    start_date = datetime.now(timezone.utc).isoformat()
+    print("\n=== TEST STARTED AT:", start_date, "===\n")
 
-    email = "testingfull@example.com"
-    password = "test123"
+    email = "testingfull8@example.com"
+    password = "Thetest123!"
 
     # Signup
     response = client.post("/signup", json={"email": email, "password": password})
-    token = ""
+    access_token = ""
     if response.status_code == 201: 
-        token = response.json()["token"]
+        access_token = response.json()["access_token"]
     else:
         response = client.post("/login", json={"email": email, "password": password})
         assert response.status_code == 200
-        token = response.json()["token"]
+        access_token = response.json()["access_token"]
 
-    assert token != ""
+    assert access_token != ""
 
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"Authorization": f"Bearer {access_token}"}
 
     for i in range(5):
         # === Use CURRENT TIME for scheduled_date ===
@@ -37,7 +38,8 @@ def test_full_workflow():
             "name": "Push Day",
             "comments": f"Test workout created.",
             "exercises": [
-                {"name": "Bench Press", "sets": 3, "reps": 15},
+                {"name": "Bench Press", "sets": 3, "reps": 15, "weight": 100,},
+                {"name": "Leg Press", "sets": 5, "reps": 15, "weight": 200,},
             ],
             "scheduled_date": datetime.now(timezone.utc).isoformat(),
         }
@@ -63,7 +65,17 @@ def test_full_workflow():
         assert response.status_code == 200
         assert response.json()["comments"] == "Updated right after creation!"
 
-    response = client.get(f"/reports/contains", params={"exercise": "Bench Press",}, headers=headers)
+    response = client.post(f"/reports/contains", json={"exercise": "Bench Press",}, headers=headers)
+    assert response.status_code == 200
+    print(response.json())
+
+    # Total volume with no exercise filter.
+    response = client.post(f"/reports/volume", json={"start_date": start_date, "end_date": datetime.now(timezone.utc).isoformat(), "exercise": ""}, headers=headers)
+    assert response.status_code == 200
+    print(response.json())
+
+    # Total volume with exercise filter.
+    response = client.post(f"/reports/volume", json={"start_date": start_date, "end_date": datetime.now(timezone.utc).isoformat(), "exercise": "Bench Press"}, headers=headers)
     assert response.status_code == 200
     print(response.json())
 
