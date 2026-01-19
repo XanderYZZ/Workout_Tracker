@@ -16,6 +16,17 @@ const Workouts: FC = () => {
   const [showCalendarPicker, setShowCalendarPicker] = useState(false);
   const [calendarDate, setCalendarDate] = useState<Date>(new Date());
 
+  const getDateToLocaleDateTime = () => {
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(selectedDate.getDate()).padStart(2, '0');
+    const hours = String(selectedDate.getHours()).padStart(2, '0');
+    const minutes = String(selectedDate.getMinutes()).padStart(2, '0');
+    const localDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+    return localDateTime;
+  }
+
   const [formData, setFormData] = useState<WorkoutFormData>({
     name: '',
     scheduled_date: new Date().toISOString().slice(0, 16),
@@ -118,21 +129,16 @@ const Workouts: FC = () => {
   const resetForm = () => {
     setFormData({
       name: '',
-      scheduled_date: new Date().toISOString().slice(0, 16),
+      scheduled_date: getDateToLocaleDateTime(),
       exercises: [],
       comments: ''
     });
   };
 
   const startEdit = (workout: Workout) => {
-    const date = new Date(workout.scheduled_date);
-    const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-      .toISOString()
-      .slice(0, 16);
-
     setFormData({
       name: workout.name,
-      scheduled_date: localDateTime,
+      scheduled_date: getDateToLocaleDateTime(),
       exercises: workout.exercises || [],
       comments: workout.comments || ''
     });
