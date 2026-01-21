@@ -61,12 +61,9 @@ def CreateAccessToken(user_id: str, email: str) -> str:
 
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-def CreateTokenPair(user_id: str, email: str, device_fingerprint: str, family_id: str = None) -> tuple:
+def CreateTokenPair(user_id: str, email: str, device_fingerprint: str) -> tuple:
     access_token = CreateAccessToken(user_id, email)
     raw_refresh_token, refresh_token_hash = CreateRefreshToken()
-    
-    if family_id is None:
-        family_id = str(uuid.uuid4())
     
     expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=REFRESH_TOKEN_DAYS)
     database.StoreRefreshToken(
@@ -74,7 +71,6 @@ def CreateTokenPair(user_id: str, email: str, device_fingerprint: str, family_id
         refresh_token_hash, 
         expires_at, 
         email,
-        family_id=family_id,
         device_fingerprint=device_fingerprint,
     )
     
@@ -97,12 +93,6 @@ def RefreshAccessToken(raw_refresh_token: str, device_fingerprint: str) -> tuple
     
     user_id = token_info["user_id"]
     email = token_info["email"]
-    family_id = token_info["family_id"]
-    token_id = token_info["token_id"]
-    
-    if database.DetectTokenReuse(token_id):
-        database.RevokeTokenFamily(family_id)
-        raise ValueError("Refresh token reuse detected")
     
     RevokeRefreshToken(raw_refresh_token)
     
@@ -110,7 +100,6 @@ def RefreshAccessToken(raw_refresh_token: str, device_fingerprint: str) -> tuple
         user_id, 
         email, 
         device_fingerprint, 
-        family_id=family_id
     )
     
     return new_access_token, new_refresh_token

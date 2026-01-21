@@ -202,7 +202,7 @@ def GetAllWorkoutsInPeriod(user_id: str, start_date: datetime, end_date: datetim
     
     return results
 
-def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str, family_id: Optional[str] = None, device_fingerprint: Optional[str] = None, parent_token_id: Optional[str] = None) -> str:
+def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str, device_fingerprint: Optional[str] = None, parent_token_id: Optional[str] = None) -> str:
     refresh_tokens = GetDb()["refresh_tokens"]
 
     result = refresh_tokens.insert_one({
@@ -211,8 +211,6 @@ def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email
         "token_hash": token_hash,
         "expires_at": expires_at,
         "created_at": datetime.now(timezone.utc),
-        "is_revoked": False,
-        "family_id": family_id,
         "device_fingerprint": device_fingerprint,
         "parent_token_id": parent_token_id
     })
@@ -223,7 +221,6 @@ def GetRefreshTokenInfo(token_hash: str) -> Optional[Dict]:
     refresh_tokens = GetDb()["refresh_tokens"]
     token = refresh_tokens.find_one({
         "token_hash": token_hash,
-        "is_revoked": False,
         "expires_at": {"$gt": datetime.now(timezone.utc)}
     })
 
@@ -231,7 +228,6 @@ def GetRefreshTokenInfo(token_hash: str) -> Optional[Dict]:
         return {
             "user_id": token["user_id"],
             "email": token["email"],
-            "family_id": token.get("family_id"),
             "device_fingerprint": token.get("device_fingerprint"),
             "token_id": str(token["_id"])
         }
@@ -243,7 +239,6 @@ def ValidateRefreshToken(user_id: str, token_hash: str) -> bool:
     token = refresh_tokens.find_one({
         "user_id": user_id,
         "token_hash": token_hash,
-        "is_revoked": False,
         "expires_at": {"$gt": datetime.now(timezone.utc)}
     })
 
@@ -251,44 +246,16 @@ def ValidateRefreshToken(user_id: str, token_hash: str) -> bool:
 
 def RevokeRefreshToken(token_hash: str) -> bool:
     refresh_tokens = GetDb()["refresh_tokens"]
-    result = refresh_tokens.update_one(
+    result = refresh_tokens.delete_one(
         {"token_hash": token_hash},
-        {"$set": {"is_revoked": True}}
     )
 
     return result.modified_count > 0
 
 def RevokeAllUserRefreshTokens(user_id: str) -> int:
     refresh_tokens = GetDb()["refresh_tokens"]
-    result = refresh_tokens.update_many(
-        {"user_id": user_id, "is_revoked": False},
-        {"$set": {"is_revoked": True}}
+    result = refresh_tokens.delete_many(
+        {"user_id": user_id},
     )
 
     return result.modified_count
-
-def RevokeTokenFamily(family_id: str) -> int:
-    refresh_tokens = GetDb()["refresh_tokens"]
-    result = refresh_tokens.update_many(
-        {"family_id": family_id, "is_revoked": False},
-        {"$set": {"is_revoked": True}}
-    )
-    
-    return result.modified_count
-
-def DetectTokenReuse(current_token_id: str) -> bool:
-    refresh_tokens = GetDb()["refresh_tokens"]
-    token = refresh_tokens.find_one({"_id": ObjectId(current_token_id)})
-    
-    if token and token.get("is_revoked"):
-        return True
-    
-    return False
-
-def CleanupExpiredRefreshTokens() -> int:
-    refresh_tokens = GetDb()["refresh_tokens"]
-    result = refresh_tokens.delete_many({
-        "expires_at": {"$lt": datetime.now(timezone.utc)}
-    })
-    
-    return result.deleted_count
