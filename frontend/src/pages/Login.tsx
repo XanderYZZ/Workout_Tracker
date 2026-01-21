@@ -20,7 +20,7 @@ const Login: FC = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: any) => {
         e.preventDefault();
         login(formData);
     }

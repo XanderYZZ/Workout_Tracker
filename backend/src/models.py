@@ -1,5 +1,5 @@
 from pydantic import AwareDatetime, BaseModel, EmailStr, Field
-from datetime import datetime
+from datetime import date, datetime
 from typing import List, Optional
 
 class UserCreate(BaseModel):
@@ -56,8 +56,9 @@ class ExerciseRequest(BaseModel):
     exercise: str
 
 class VolumeOverPeriodRequest(BaseModel):
-    start_date: AwareDatetime
-    end_date: AwareDatetime
+    start_date: date
+    end_date: date
+    timezone: str
     exercise: str | None = None
 
 class VolumeOverPeriodReport(BaseModel):

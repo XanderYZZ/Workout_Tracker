@@ -24,4 +24,15 @@ export const DatesLibrary = {
 
         return isNaN(dateObj.getTime()); 
     },
+
+    formatDateToLocaleDateString: (dateInput: string): string => {
+        return new Date(dateInput).toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    },
 };

@@ -97,6 +97,7 @@ const Reports: FC = () => {
         apiClient.post("/reports/volume", {
             start_date: new Date(startDate).toISOString(),
             end_date: new Date(endDate).toISOString(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             exercise: selectedExercise || null,
         }).then(response => {
             setVolumeReportTotal(response.data.total_volume);
@@ -197,7 +198,7 @@ const Reports: FC = () => {
 
                                                     <p className="text-sm text-gray-600">
                                                         Scheduled:{" "}
-                                                        {new Date(workout.scheduled_date).toLocaleDateString()}
+                                                        {DatesLibrary.formatDateToLocaleDateString(workout.scheduled_date)}
                                                     </p>
 
                                                     {workout.exercises?.length > 0 && (

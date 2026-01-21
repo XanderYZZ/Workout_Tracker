@@ -154,20 +154,26 @@ def GetAllExercisesForUser(user_id: str) -> List[str]:
     
     return exercises
 
-def GetWorkoutsThatContainExercise(user_id : str, exercise_name : str) -> Optional[Dict]:
+def GetWorkoutsThatContainExercise(user_id: str, exercise_name: str, start_date: datetime | None = None, end_date: datetime | None = None) -> List[Dict]:
     results = []
     workouts = GetDb()["workouts"]
-    pipeline = [
-        {"$match": {
-            "user_id": user_id,
-            "exercises.name": exercise_name
-        }},
-        {"$sort": {"scheduled_date": -1}},
-        {"$limit": 50}
-    ]
-    
-    cursor = workouts.aggregate(pipeline)
+    cursor = None
 
+    if not start_date or not end_date:
+        cursor = workouts.find({
+            "user_id": user_id,
+            "exercises.name": exercise_name,
+        }).sort("scheduled_date", -1)
+    else:
+        cursor = workouts.find({
+            "user_id": user_id,
+            "exercises.name": exercise_name,
+            "scheduled_date": {
+                "$gte": start_date,
+                "$lte": end_date
+            },
+        }).sort("scheduled_date", -1)
+    
     for workout in cursor:
         workout = MakeDatetimeAware(workout)
         workout["id"] = str(workout["_id"])

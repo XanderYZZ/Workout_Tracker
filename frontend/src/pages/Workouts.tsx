@@ -162,17 +162,6 @@ const Workouts: FC = () => {
     });
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   const getWorkoutsForDate = (date: Date) => {
     return workouts.filter((workout) => {
       const workoutDate = new Date(workout.scheduled_date);
@@ -495,7 +484,7 @@ const Workouts: FC = () => {
                         <h3 className="text-lg font-semibold text-gray-900">{workout.name}</h3>
                         <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
                           <Calendar size={16} />
-                          {formatDate(workout.scheduled_date)}
+                          {DatesLibrary.formatDateToLocaleDateString(workout.scheduled_date)}
                         </div>
                         {workout.exercises && workout.exercises.length > 0 && (
                           <p className="text-sm text-gray-500 mt-1">
