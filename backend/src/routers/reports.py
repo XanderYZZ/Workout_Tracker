@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-import backend.src.lib.database_lib.database as database
-import backend.src.lib.database_lib.models as models
-import backend.src.lib.database_lib.auth_helper as auth_helper
+import lib.database_lib.database as database
+import lib.database_lib.models as models
+import lib.database_lib.auth_helper as auth_helper
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from backend.src.lib.misc import dates
+from lib.misc import dates
 
 router = APIRouter(tags=["reports"], prefix="/reports")
 limiter = Limiter(key_func=get_remote_address)

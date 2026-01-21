@@ -250,7 +250,7 @@ def RevokeRefreshToken(token_hash: str) -> bool:
         {"token_hash": token_hash},
     )
 
-    return result.modified_count > 0
+    return result.deleted_count > 0
 
 def RevokeAllUserRefreshTokens(user_id: str) -> int:
     refresh_tokens = GetDb()["refresh_tokens"]
@@ -258,4 +258,4 @@ def RevokeAllUserRefreshTokens(user_id: str) -> int:
         {"user_id": user_id},
     )
 
-    return result.modified_count
+    return result.deleted_count

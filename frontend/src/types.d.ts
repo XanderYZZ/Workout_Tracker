@@ -71,3 +71,11 @@ interface CalendarPickerProps {
     selectDateFromCalendar: (day: number) => void;
     getWorkoutsForDate: (date: Date) => any[];
 }
+
+interface ListedWorkoutProps {
+    workout: Workout;
+    setExpandedId: (id: string | null) => void;
+    getExpandedId: () => string | null;
+    startEdit?: (workout: Workout) => void;
+    deleteWorkout?: (id: string) => void;
+}

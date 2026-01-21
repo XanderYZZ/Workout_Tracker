@@ -7,6 +7,7 @@ import { Navbar } from "../components/navbar.tsx";
 import { CalendarPicker } from '../components/calendar_picker';
 import { DatesLibrary } from '../lib/dates';
 import { Notifications } from '../lib/notifications';
+import { ListedWorkout } from '../components/listed_workout';
 
 const Workouts: FC = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -249,10 +250,11 @@ const Workouts: FC = () => {
       <div className="min-w-[40vw] max-w-[70vw] mx-auto pt-6">
         {/* Header with Date Navigation */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">My Workouts</h1>
-              <p className="text-gray-600 mt-1">Workouts scheduled: {workouts.length}</p>
+              <p className="text-gray-600 mt-1">Total workouts scheduled ever: {workouts.length}</p>
+              <p className="text-gray-600 mt-1">Total workouts scheduled for this date: {getWorkoutsForDate(selectedDate).length}</p>
             </div>
             <button
               onClick={() => {
@@ -432,6 +434,7 @@ const Workouts: FC = () => {
                   Comments
                 </label>
                 <textarea
+                  maxLength={150}
                   value={formData.comments}
                   onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
                   rows={3}
@@ -477,71 +480,13 @@ const Workouts: FC = () => {
               </div>
             ) : (
               getWorkoutsForDate(selectedDate).map((workout) => (
-                <div key={workout.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900">{workout.name}</h3>
-                        <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
-                          <Calendar size={16} />
-                          {DatesLibrary.formatDateToLocaleDateString(workout.scheduled_date)}
-                        </div>
-                        {workout.exercises && workout.exercises.length > 0 && (
-                          <p className="text-sm text-gray-500 mt-1">
-                            {workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setExpandedId(expandedId === workout.id ? null : workout.id)}
-                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                          {expandedId === workout.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                        </button>
-                        <button
-                          onClick={() => startEdit(workout)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        >
-                          <Edit2 size={20} />
-                        </button>
-                        <button
-                          onClick={() => deleteWorkout(workout.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {expandedId === workout.id && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        {workout.exercises && workout.exercises.length > 0 && (
-                          <div className="mb-4">
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">Exercises</h4>
-                            <div className="space-y-2">
-                              {workout.exercises.map((exercise, idx) => (
-                                <div key={idx} className="bg-gray-50 rounded p-3 text-sm">
-                                  <div className="font-medium text-gray-900">{exercise.name}</div>
-                                  <div className="text-gray-600 mt-1">
-                                    {exercise.sets} sets × {exercise.reps} reps
-                                    {exercise.weight > 0 && ` @ ${exercise.weight} lbs`}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {workout.comments && (
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">Comments</h4>
-                            <p className="text-sm text-gray-600 bg-gray-50 rounded p-3">{workout.comments}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <ListedWorkout
+                  workout={workout}
+                  getExpandedId={() => expandedId}
+                  setExpandedId={setExpandedId}
+                  startEdit={startEdit}
+                  deleteWorkout={deleteWorkout}
+                />
               ))
             )}
           </div>

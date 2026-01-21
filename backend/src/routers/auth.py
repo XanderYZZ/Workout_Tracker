@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status, APIRouter, Depends, Request, Response
-import backend.src.lib.database_lib.database as database
-import backend.src.lib.database_lib.models as models
-import backend.src.lib.database_lib.auth_helper as auth_helper
+import lib.database_lib.database as database
+import lib.database_lib.models as models
+import lib.database_lib.auth_helper as auth_helper
 import os
 from slowapi import Limiter
 from slowapi.util import get_remote_address

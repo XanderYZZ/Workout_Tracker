@@ -1,14 +1,13 @@
 from fastapi import HTTPException, status, Header, Request
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-import backend.src.lib.database_lib.database as database
-import backend.src.lib.database_lib.models as models
+from . import database
+from . import models
 import jwt 
 import datetime
 import config
 import secrets
 import hashlib
-import uuid
 import os
 
 SECRET_KEY = config.SECRET_KEY

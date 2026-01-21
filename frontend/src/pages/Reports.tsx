@@ -6,6 +6,7 @@ import { ExerciseDropdown } from "../components/exercise_dropdown";
 import { Notifications } from '../lib/notifications';
 import { StartAndEndDateSelection } from "../components/start_and_end_date_selection";
 import { DatesLibrary } from "../lib/dates";
+import { ListedWorkout } from "../components/listed_workout";
 
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
@@ -21,6 +22,7 @@ const Reports: FC = () => {
     const [endDate, setEndDate] = useState<string>("");
     const [volumeReportTotal, setVolumeReportTotal] = useState<number | null>(null);
     const [volumeReportExercise, setVolumeReportExercise] = useState<string | null>(null);
+    const [expandedId, setExpandedId] = useState<string | null>(null);
 
     const setReportTypeToContains = () => setReportType("contains");
     const setReportTypeToVolume = () => setReportType("volume");
@@ -80,6 +82,10 @@ const Reports: FC = () => {
         setWorkouts([]);
         setStatus("none");
         setDropdownVisible(false);
+        setStartDate("");
+        setEndDate("");
+        setVolumeReportTotal(null);
+        setVolumeReportExercise(null);
     }, [reportType]);
 
     const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,40 +194,11 @@ const Reports: FC = () => {
 
                                         <ul className="space-y-4">
                                             {workouts.map(workout => (
-                                                <li
-                                                    key={workout.id}
-                                                    className="rounded-lg border border-gray-200 p-4"
-                                                >
-                                                    <h3 className="font-semibold text-gray-900">
-                                                        {workout.name}
-                                                    </h3>
-
-                                                    <p className="text-sm text-gray-600">
-                                                        Scheduled:{" "}
-                                                        {DatesLibrary.formatDateToLocaleDateString(workout.scheduled_date)}
-                                                    </p>
-
-                                                    {workout.exercises?.length > 0 && (
-                                                        <div className="mt-3">
-                                                            <p className="font-medium text-gray-900">
-                                                                Exercises
-                                                            </p>
-                                                            <ul className="list-disc list-inside text-sm">
-                                                                {workout.exercises.map((exercise, i) => (
-                                                                    <li key={i} className="text-gray-600">
-                                                                        {exercise.name} — {exercise.sets}×{exercise.reps} @ {exercise.weight} lbs
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
-
-                                                    {workout.comments && (
-                                                        <p className="mt-2 text-sm text-gray-700">
-                                                            Comments: {workout.comments}
-                                                        </p>
-                                                    )}
-                                                </li>
+                                                <ListedWorkout
+                                                    workout={workout}
+                                                    getExpandedId={() => expandedId}
+                                                    setExpandedId={setExpandedId}
+                                                />
                                             ))}
                                         </ul>
                                     </div>

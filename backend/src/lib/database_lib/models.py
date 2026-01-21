@@ -14,8 +14,8 @@ class ExerciseInWorkout(BaseModel):
     name: str
     sets: int
     reps: int
-    weight: Optional[float] = None
-    notes: Optional[str] = None
+    weight: float = 0
+    notes: Optional[str] = Field(None, max_length=200)
 
 class WorkoutCreate(BaseModel):
     name: str
