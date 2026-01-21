@@ -2,6 +2,7 @@ import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { apiClient } from "../lib/apiclient";
 import { Navbar } from "../components/navbar";
+import { ExerciseDropdown } from "../components/exercise_dropdown";
 
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
@@ -13,6 +14,8 @@ const Reports: FC = () => {
     const [selectedExercise, setSelectedExercise] = useState("");
     const [status, setStatus] = useState<STATUS_TYPE>("none");
     const [workouts, setWorkouts] = useState<Workout[]>([]);
+    const [startDate, setStartDate] = useState<string>("");
+    const [endDate, setEndDate] = useState<string>("");
 
     const setReportTypeToContains = () => setReportType("contains");
     const setReportTypeToVolume = () => setReportType("volume");
@@ -65,10 +68,34 @@ const Reports: FC = () => {
     }, [selectedExercise]);
 
     useEffect(() => {
+        // Reset state when report type changes.
         setSelectedExercise("");
         setWorkouts([]);
         setStatus("none");
+        setIsVisible(false);
     }, [reportType]);
+
+    const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setStartDate(e.target.value);
+    };
+
+    const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEndDate(e.target.value);
+    };   
+
+    const generateVolumeReport = () => {
+        if (startDate == "" || endDate == "") { return; }
+
+        apiClient.post("/reports/volume", {
+            start_date: new Date(startDate).toISOString(),
+            end_date: new Date(endDate).toISOString(),
+            exercise: selectedExercise || null,
+        }).then(response => {
+            console.log("Volume Report Data:", response.data);
+        }).catch(error => {
+            console.error("Error generating volume report:", error);
+        });
+    };
 
     return (
         <div className="background-primary min-h-screen">
@@ -113,36 +140,13 @@ const Reports: FC = () => {
                             </h1>
 
                             {/* Selector */}
-                            <div className="relative w-full">
-                                <button
-                                    onClick={toggleDropdown}
-                                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-left text-gray-900 shadow-sm"
-                                >
-                                    {selectedExercise || "Select an Exercise"}
-                                    <span className="float-right">
-                                        {isVisible ? "▲" : "▼"}
-                                    </span>
-                                </button>
-
-                                {isVisible && (
-                                    <ul className="absolute z-10 mt-2 max-h-60 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg">
-                                        {exercises.map(exercise => (
-                                            <li key={exercise}>
-                                                <button
-                                                    onClick={() => handleToggle(exercise)}
-                                                    className={`w-full px-4 py-2 text-left text-gray-900 hover:bg-gray-100 ${
-                                                        selectedExercise === exercise
-                                                            ? "bg-gray-200 font-semibold"
-                                                            : ""
-                                                    }`}
-                                                >
-                                                    {exercise}
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
+                            {ExerciseDropdown(
+                                toggleDropdown,
+                                () => isVisible,
+                                () => selectedExercise || null,
+                                () => exercises,
+                                handleToggle
+                            )}
 
                             {/* Report Panel */}
                             <div className="w-full rounded-xl bg-white p-6 shadow-md">
@@ -222,12 +226,43 @@ const Reports: FC = () => {
                         </div>
                     </div>
                 )}
+
                 {/* Report: Volume */}
                 {reportType === "volume" && (
                     <div className="flex justify-center pt-32">
+                        <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4">
                         <h1 className="text-gray-900 text-lg">Volume Report</h1>
-                        {/* I need to make the calendar picker a reusable component in the "components" folder that
-                        can be used here and in the Workouts page. */}
+                        {/* Start date */}
+                        <div className="flex items-center space-x-8">
+                            <label className="block text-gray-900 min-w-20 max-w-20">
+                                Start Date:
+                            </label>
+                            <input onChange={handleStartDateChange} type="date" className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
+                        </div>
+                        {/* End date */}
+                        <div className="flex items-center space-x-8">
+                            <label className="block text-gray-900 min-w-20 max-w-20">
+                                End Date:
+                            </label>
+                            <input onChange={handleEndDateChange} type="date" className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
+                        </div>
+                        <h1 className="text-gray-900 text-lg text-center">
+                            Optionally select an exercise to only include it.
+                        </h1>
+
+                        {/* Selector */}
+                        {ExerciseDropdown(
+                            toggleDropdown,
+                            () => isVisible,
+                            () => selectedExercise || null,
+                            () => exercises,
+                            handleToggle
+                        )}
+
+                        <button onClick={generateVolumeReport} className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white">
+                            Generate Report
+                        </button>
+                        </div>
                     </div>
                 )}
             </>
