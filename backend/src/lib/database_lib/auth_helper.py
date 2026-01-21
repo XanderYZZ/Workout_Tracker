@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status, Header, Request
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-import database
-import models
+import backend.src.lib.database_lib.database as database
+import backend.src.lib.database_lib.models as models
 import jwt 
 import datetime
 import config

@@ -1,9 +1,9 @@
 from typing import List, Optional
 from bson import ObjectId
 from fastapi import Query, Request, status, APIRouter, Depends, HTTPException
-import database
-import models
-import auth_helper
+import backend.src.lib.database_lib.database as database
+import backend.src.lib.database_lib.models as models
+import backend.src.lib.database_lib.auth_helper as auth_helper
 from datetime import datetime, timezone
 from slowapi import Limiter
 from slowapi.util import get_remote_address
