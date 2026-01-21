@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { apiClient } from "../lib/apiclient";
 import { Navbar } from "../components/navbar";
 import { ExerciseDropdown } from "../components/exercise_dropdown";
-import { DatesLibrary } from "../lib/dates";
 import { Notifications } from '../lib/notifications';
+import { StartAndEndDateSelection } from "../components/start_and_end_date_selection";
+import { DatesLibrary } from "../lib/dates";
 
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
@@ -90,7 +91,8 @@ const Reports: FC = () => {
     };   
 
     const generateVolumeReport = () => {
-        if (startDate == "" || endDate == "") { return; }
+        if (DatesLibrary.isInvalidDateString(startDate)) { return; }
+        if (DatesLibrary.isInvalidDateString(endDate)) { return; }
 
         apiClient.post("/reports/volume", {
             start_date: new Date(startDate).toISOString(),
@@ -104,29 +106,25 @@ const Reports: FC = () => {
         });
     };
 
+    const createReportTypeButton = (reportTypeForButton: REPORT_TYPE_OPEN, text: string, setReportType: () => void) => {
+        return (
+            <button
+                onClick={setReportType}
+                className={reportType == reportTypeForButton ? "mr-12 w-30 rounded-lg bg-blue-400 px-4 py-2 text-white" : "mr-12 w-30 rounded-lg bg-gray-400 px-4 py-2 text-white"}
+            >
+                {text}
+            </button>
+        );
+    };
+
     return (
         <div className="background-primary min-h-screen">
             <Navbar />
             {/* Selection for different types of reports */}
             <div className="pt-4 flex min-h-10 items-center justify-center">
-                <button
-                    onClick={setReportTypeToContains}
-                    className={reportType == "contains" ? "mr-12 w-30 rounded-lg bg-blue-400 px-4 py-2 text-white" : "mr-12 w-30 rounded-lg bg-gray-400 px-4 py-2 text-white"}
-                >
-                    Contains
-                </button>
-                <button
-                    onClick={setReportTypeToVolume}
-                    className={reportType == "volume" ? "mr-12 w-30 rounded-lg bg-blue-400 px-4 py-2 text-white" : "mr-12 w-30 rounded-lg bg-gray-400 px-4 py-2 text-white"}
-                >
-                    Volume
-                </button>
-                <button
-                    onClick={setReportTypeTo1RM}
-                    className={reportType == "1rm" ? "mr-12 w-30 rounded-lg bg-blue-400 px-4 py-2 text-white" : "mr-12 w-30 rounded-lg bg-gray-400 px-4 py-2 text-white"}
-                >
-                    1RM
-                </button>
+                {createReportTypeButton("contains", "Contains", setReportTypeToContains)}
+                {createReportTypeButton("volume", "Volume", setReportTypeToVolume)}
+                {createReportTypeButton("1rm", "1RM", setReportTypeTo1RM)}
             </div>
 
             {exercises.length === 0 ? (
@@ -236,43 +234,33 @@ const Reports: FC = () => {
                 {reportType === "volume" && (
                     <div className="flex justify-center pt-32">
                         <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
-                        <h1 className="text-gray-900 text-lg">Volume Report</h1>
-                        {/* Start date */}
-                        <div className="flex items-center space-x-8">
-                            <label className="block text-gray-900 min-w-20 max-w-20">
-                                Start Date:
-                            </label>
-                            <input onChange={handleStartDateChange} type="date" max={endDate ? endDate : DatesLibrary.getLocalToday()} className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
-                        </div>
-                        {/* End date */}
-                        <div className="flex items-center space-x-8">
-                            <label className="block text-gray-900 min-w-20 max-w-20">
-                                End Date:
-                            </label>
-                            <input onChange={handleEndDateChange} type="date" min={startDate ? startDate : ""} max={DatesLibrary.getLocalToday()} className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
-                        </div>
-                        <h1 className="text-gray-900 text-lg text-center">
-                            Optionally select an exercise to only include it.
-                        </h1>
+                            <h1 className="text-gray-900 text-lg">Volume Report</h1>
+                            
+                            <StartAndEndDateSelection
+                                handleStartDateChange={handleStartDateChange}
+                                handleEndDateChange={handleEndDateChange}
+                                getStartDate={() => startDate}
+                                getEndDate={() => endDate}
+                            />
 
-                        <ExerciseDropdown
-                            toggleDropdown={toggleDropdown}
-                            isVisible={dropdownVisible}
-                            selectedExercise={selectedExercise}
-                            exercises={exercises}
-                            handleToggle={handleToggle}
-                        />
+                            <ExerciseDropdown
+                                toggleDropdown={toggleDropdown}
+                                isVisible={dropdownVisible}
+                                selectedExercise={selectedExercise}
+                                exercises={exercises}
+                                handleToggle={handleToggle}
+                            />
 
-                        <button onClick={generateVolumeReport} className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white">
-                            Generate Report
-                        </button>
-                        {volumeReportTotal !== null && (
-                            <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
-                                <h2 className="text-xl font-semibold text-gray-600">
-                                    Total volume {volumeReportExercise ? `for ${volumeReportExercise}` : "for all exercises"}: {volumeReportTotal} lbs
-                                </h2>
-                            </div>
-                        )}
+                            <button onClick={generateVolumeReport} className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white">
+                                Generate Report
+                            </button>
+                            {volumeReportTotal !== null && (
+                                <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
+                                    <h2 className="text-xl font-semibold text-gray-600">
+                                        Total volume {volumeReportExercise ? `for ${volumeReportExercise}` : "for all exercises"}: {volumeReportTotal} lbs
+                                    </h2>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

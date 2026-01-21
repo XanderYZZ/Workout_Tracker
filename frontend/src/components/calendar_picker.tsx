@@ -1,18 +1,6 @@
 import type { FC } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-interface CalendarPickerProps {
-    goToPreviousMonth: () => void;
-    goToNextMonth: () => void;
-    goToTodayInCalendar: () => void;
-    calendarDate: Date;
-    selectedDate: Date;
-    getFirstDayOfMonth: (date: Date) => number;
-    getDaysInMonth: (date: Date) => number;
-    selectDateFromCalendar: (day: number) => void;
-    getWorkoutsForDate: (date: Date) => any[];
-}
-
 export const CalendarPicker: FC<CalendarPickerProps> = ({
     goToPreviousMonth,
     goToNextMonth,

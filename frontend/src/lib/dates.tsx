@@ -18,4 +18,10 @@ export const DatesLibrary = {
 
         return `${year}-${month}-${day}`;
     },
+
+    isInvalidDateString: (dateInput: string): boolean => {
+        const dateObj = new Date(dateInput);
+
+        return isNaN(dateObj.getTime()); 
+    },
 };

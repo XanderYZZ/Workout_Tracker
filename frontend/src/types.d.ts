@@ -44,3 +44,30 @@ interface WorkoutFormData {
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+interface StartAndEndDateSelectionProps { 
+     handleStartDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+     handleEndDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+     getStartDate: () => string,
+     getEndDate: () => string,
+}
+
+interface ExerciseDropdownProps {
+    toggleDropdown: () => void;
+    isVisible: boolean;
+    selectedExercise: string | null;
+    exercises: string[];
+    handleToggle: (exercise: string) => void;
+}
+
+interface CalendarPickerProps {
+    goToPreviousMonth: () => void;
+    goToNextMonth: () => void;
+    goToTodayInCalendar: () => void;
+    calendarDate: Date;
+    selectedDate: Date;
+    getFirstDayOfMonth: (date: Date) => number;
+    getDaysInMonth: (date: Date) => number;
+    selectDateFromCalendar: (day: number) => void;
+    getWorkoutsForDate: (date: Date) => any[];
+}
