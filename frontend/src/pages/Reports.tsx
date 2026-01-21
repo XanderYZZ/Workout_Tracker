@@ -242,14 +242,14 @@ const Reports: FC = () => {
                             <label className="block text-gray-900 min-w-20 max-w-20">
                                 Start Date:
                             </label>
-                            <input onChange={handleStartDateChange} type="date" max={DatesLibrary.getLocalToday()} className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
+                            <input onChange={handleStartDateChange} type="date" max={endDate ? endDate : DatesLibrary.getLocalToday()} className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
                         </div>
                         {/* End date */}
                         <div className="flex items-center space-x-8">
                             <label className="block text-gray-900 min-w-20 max-w-20">
                                 End Date:
                             </label>
-                            <input onChange={handleEndDateChange} type="date" max={DatesLibrary.getLocalToday()} className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
+                            <input onChange={handleEndDateChange} type="date" min={startDate ? startDate : ""} max={DatesLibrary.getLocalToday()} className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
                         </div>
                         <h1 className="text-gray-900 text-lg text-center">
                             Optionally select an exercise to only include it.

@@ -57,10 +57,11 @@ async def GetVolumeOverPeriodReport(
     exercise = ""
     total_volume = 0
 
-    if payload.start_date >= payload.end_date:
+    # The start date can either be the same as the end date, or before it.
+    if payload.start_date > payload.end_date:
         raise HTTPException(
             status_code=400,
-            detail="Start date must be before end date!"
+            detail="The start date must be equal to or before the end date!"
         )
 
     if payload.exercise: 
