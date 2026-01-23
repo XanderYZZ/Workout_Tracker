@@ -10,13 +10,16 @@ export const DatesLibrary = {
         return localDateTime;
     },
 
-    getLocalToday: (): string => {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const day = String(now.getDate()).padStart(2, "0");
+    convertDateToYMD: (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
 
         return `${year}-${month}-${day}`;
+    },
+
+    getLocalToday: (): string => {
+        return DatesLibrary.convertDateToYMD(new Date());
     },
 
     isInvalidDateString: (dateInput: string): boolean => {

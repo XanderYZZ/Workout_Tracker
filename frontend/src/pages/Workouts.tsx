@@ -9,6 +9,13 @@ import { DatesLibrary } from '../lib/dates';
 import { Notifications } from '../lib/notifications';
 import { ListedWorkout } from '../components/listed_workout';
 
+interface WorkoutFormData {
+  name: string;
+  scheduled_date: string;
+  exercises: Exercise[];
+  comments: string;
+}
+
 const Workouts: FC = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +24,6 @@ const Workouts: FC = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showCalendarPicker, setShowCalendarPicker] = useState(false);
-  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
 
   const [formData, setFormData] = useState<WorkoutFormData>({
     name: '',
@@ -194,28 +200,6 @@ const Workouts: FC = () => {
     changeDayOrMonth(true, 1);
   };
 
-  const goToPreviousMonth = () => {
-    const newDate = new Date(calendarDate);
-    newDate.setMonth(newDate.getMonth() - 1);
-    setCalendarDate(newDate);
-  };
-
-  const goToNextMonth = () => {
-    const newDate = new Date(calendarDate);
-    newDate.setMonth(newDate.getMonth() + 1);
-    setCalendarDate(newDate);
-  };
-
-  const selectDateFromCalendar = (day: number) => {
-    const newDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), day);
-    setSelectedDate(newDate);
-    setShowCalendarPicker(false);
-  };
-
-  const goToTodayInCalendar = () => {
-    selectDateFromCalendar(new Date().getDate());
-  };
-
   const createUpdateExerciseField = (exercise: Exercise, index: number, attribute: string, input_type: string) => {
     return (
       <input
@@ -296,16 +280,13 @@ const Workouts: FC = () => {
               </button>
             </div>
 
-            {/* Calendar Picker Modal */}
-            {showCalendarPicker && <CalendarPicker
-              calendarDate={calendarDate}
+            <CalendarPicker
               selectedDate={selectedDate}
-              goToPreviousMonth={goToPreviousMonth}
-              goToNextMonth={goToNextMonth}
-              goToTodayInCalendar={goToTodayInCalendar}
-              selectDateFromCalendar={selectDateFromCalendar}
+              onSelectDate={setSelectedDate}
+              isOpen={showCalendarPicker}
+              onClose={() => setShowCalendarPicker(false)}
               getWorkoutsForDate={getWorkoutsForDate}
-            />}
+            />
           </div>
         </div>
 

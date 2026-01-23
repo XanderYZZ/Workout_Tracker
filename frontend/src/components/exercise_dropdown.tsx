@@ -1,5 +1,13 @@
 import type { FC } from "react";
 
+interface ExerciseDropdownProps {
+    toggleDropdown: () => void;
+    isVisible: boolean;
+    selectedExercise: string | null;
+    exercises: string[];
+    handleToggle: (exercise: string) => void;
+}
+
 export const ExerciseDropdown: FC<ExerciseDropdownProps> = ({
     toggleDropdown,
     isVisible,

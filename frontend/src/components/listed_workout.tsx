@@ -2,6 +2,14 @@ import type { FC } from "react";
 import { DatesLibrary } from '../lib/dates';
 import { Calendar, Edit2, Trash2, ChevronDown, ChevronUp, } from 'lucide-react';
 
+interface ListedWorkoutProps {
+    workout: Workout;
+    setExpandedId: (id: string | null) => void;
+    getExpandedId: () => string | null;
+    startEdit?: (workout: Workout) => void;
+    deleteWorkout?: (id: string) => void;
+}
+
 export const ListedWorkout: FC<ListedWorkoutProps> = ({
     workout,
     getExpandedId,
@@ -67,7 +75,7 @@ export const ListedWorkout: FC<ListedWorkoutProps> = ({
                     <div className="bg-gray-50 rounded p-3 text-sm mb-2">
                         <div className="font-medium text-gray-900 mb-0">
                             <p>
-                                Total Volume: {getTotalWorkoutVolume()}
+                                Total Volume: {getTotalWorkoutVolume().toLocaleString()}
                             </p>
                         </div>
                     </div>
@@ -80,7 +88,7 @@ export const ListedWorkout: FC<ListedWorkoutProps> = ({
                                 <div className="font-medium text-gray-900">{exercise.name}</div>
                                 <div className="text-gray-600 mt-1">
                                 {exercise.sets} sets × {exercise.reps} reps
-                                {` @ ${exercise.weight} lbs`}
+                                {` @ ${exercise.weight.toLocaleString()} lbs`}
                                 </div>
                             </div>
                             ))}

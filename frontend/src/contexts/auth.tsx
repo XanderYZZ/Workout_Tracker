@@ -3,6 +3,23 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from 'react-router-dom';
 
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+interface AuthContextType {
+  user: User | null;
+  accessToken: string | null;
+  isLoading: boolean;
+  signup: (formData: any) => Promise<void>;
+  login: (formData: any) => Promise<void>;
+  logout: () => Promise<void>;
+  errors: Record<string, string>;
+  setErrors: (errors: Record<string, string>) => void;
+  setIsLoading: (loading: boolean) => void;
+  isAuthenticated: () => boolean;
+}
+
 const base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 
 const isAuthenticatedDefault = () => {

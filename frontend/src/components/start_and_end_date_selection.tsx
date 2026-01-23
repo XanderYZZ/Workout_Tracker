@@ -1,6 +1,13 @@
 import type { FC } from "react";
 import { DatesLibrary } from "../lib/dates";
 
+interface StartAndEndDateSelectionProps { 
+     handleStartDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+     handleEndDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+     getStartDate: () => string,
+     getEndDate: () => string,
+}
+
 export const StartAndEndDateSelection: FC<StartAndEndDateSelectionProps> = ({
     handleStartDateChange,
     handleEndDateChange,

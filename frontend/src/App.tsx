@@ -10,6 +10,7 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Workouts from './pages/Workouts';
 import Reports from './pages/Reports';
+import ErrorPage from './pages/ErrorPage';
 import ProtectedRoute from './wrappers/protected_route';
 
 function Layout() {
@@ -26,6 +27,7 @@ function App() {
     {
       path: "/",
       element: <Layout />,
+      errorElement: <ErrorPage />,
       children: [
         {
           index: true,
