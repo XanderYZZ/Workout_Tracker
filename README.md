@@ -1,1 +1,3 @@
-This project is actively being worked on. This project was inspired by: https://roadmap.sh/projects/fitness-workout-tracker. However, it has been substantially revised from the original project prompt. The backend uses Python with FastAPI, MongoDB, and JWT authentication tokens. The frontend uses TypeScript with ReactJS and TailwindCSS.
+-Full-stack project that allows you to track workouts for progress. 
+-The backend uses Python with FastAPI, MongoDB, and JWT authentication tokens. 
+-The frontend uses TypeScript with ReactJS and TailwindCSS.
