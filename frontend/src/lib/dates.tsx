@@ -35,4 +35,28 @@ export const DatesLibrary = {
             minute: '2-digit'
         });
     },
+
+    getFirstDayOfMonth: (date: Date): number => {
+        return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+    },
+
+    formatDisplayDate: (date: Date): string => {
+        return date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    },
+
+    /*
+      A note for myself from the overview online:
+      When JavaScript's Date constructor is given a day of 0, it interprets this as 
+      "one day before the first day of the specified month." 
+      Therefore, the day 0 of the next month refers to 
+      the very last day of the current month.
+    */
+    getDaysInMonth: (date: Date): number => {
+        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    }
 };

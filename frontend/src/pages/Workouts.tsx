@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { apiClient } from "../lib/apiclient";
-import { Calendar, Plus, Edit2, Trash2, X, Check, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Plus, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { Navbar } from "../components/navbar.tsx";
 import { CalendarPicker } from '../components/calendar_picker';
@@ -38,7 +38,7 @@ const Workouts: FC = () => {
 
       const data = response.data;
       setWorkouts(data);
-    } catch (err : any) {
+    } catch (err: any) {
       Notifications.showError(err);
     } finally {
       setLoading(false);
@@ -66,7 +66,7 @@ const Workouts: FC = () => {
       await fetchWorkouts();
       resetForm();
       setIsCreating(false);
-    } catch (err : any) {
+    } catch (err: any) {
       Notifications.showError(err);
     }
   };
@@ -85,7 +85,7 @@ const Workouts: FC = () => {
       await fetchWorkouts();
       resetForm();
       setEditingId(null);
-    } catch (err : any) {
+    } catch (err: any) {
       Notifications.showError(err);
     }
   };
@@ -114,7 +114,7 @@ const Workouts: FC = () => {
       if (response.status !== 204) throw new Error('Failed to delete workout');
 
       await fetchWorkouts();
-    } catch (err : any) {
+    } catch (err: any) {
       Notifications.showError(err);
     }
   };
@@ -174,31 +174,7 @@ const Workouts: FC = () => {
     });
   };
 
-  const formatDisplayDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const getDaysInMonth = (date: Date) => {
-    /*
-      A note for myself from the overview online:
-      When JavaScript's Date constructor is given a day of 0, it interprets this as 
-      "one day before the first day of the specified month." 
-      Therefore, the day 0 of the next month refers to 
-      the very last day of the current month.
-    */
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  };
-
-  const changeDayOrMonth = (is_day : boolean, offset: number) => {
+  const changeDayOrMonth = (is_day: boolean, offset: number) => {
     const newDate = new Date(selectedDate);
 
     if (is_day) {
@@ -219,11 +195,15 @@ const Workouts: FC = () => {
   };
 
   const goToPreviousMonth = () => {
-    changeDayOrMonth(false, -1);
+    const newDate = new Date(calendarDate);
+    newDate.setMonth(newDate.getMonth() - 1);
+    setCalendarDate(newDate);
   };
 
   const goToNextMonth = () => {
-    changeDayOrMonth(false, 1);
+    const newDate = new Date(calendarDate);
+    newDate.setMonth(newDate.getMonth() + 1);
+    setCalendarDate(newDate);
   };
 
   const selectDateFromCalendar = (day: number) => {
@@ -236,6 +216,18 @@ const Workouts: FC = () => {
     selectDateFromCalendar(new Date().getDate());
   };
 
+  const createUpdateExerciseField = (exercise: Exercise, index: number, attribute: string, input_type: string) => {
+    return (
+      <input
+        type={input_type}
+        value={exercise[attribute as keyof Exercise] as string}
+        onChange={(e) => updateExercise(index, attribute as keyof Exercise, e.target.value)}
+        placeholder={attribute.charAt(0).toUpperCase() + attribute.slice(1)}
+        className="text-gray-700 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+      />
+    );
+  }
+
   if (loading && workouts.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -247,14 +239,13 @@ const Workouts: FC = () => {
   return (
     <div className="background-primary">
       <Navbar></Navbar>
-      <div className="min-w-[40vw] max-w-[70vw] mx-auto pt-6">
-        {/* Header with Date Navigation */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto pt-6 max-w-7xl">
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Workouts</h1>
-              <p className="text-gray-600 mt-1">Total workouts scheduled ever: {workouts.length}</p>
-              <p className="text-gray-600 mt-1">Total workouts scheduled for this date: {getWorkoutsForDate(selectedDate).length}</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Workouts</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">Total workouts scheduled ever: {workouts.length}</p>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">Total workouts scheduled for this date: {getWorkoutsForDate(selectedDate).length}</p>
             </div>
             <button
               onClick={() => {
@@ -262,46 +253,46 @@ const Workouts: FC = () => {
                 setIsCreating(true);
                 setEditingId(null);
               }}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
             >
               <Plus size={20} />
               New Workout
             </button>
           </div>
 
-          {/* Date Navigation Section */}
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <div className="flex items-center justify-between">
+          <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-2 sm:gap-4">
               <button
                 onClick={goToPreviousDay}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
               >
-                <ChevronLeft size={24} />
+                <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
               </button>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 flex-1 sm:flex-none justify-center">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {selectedDate.getDate()}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     {selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short' })}
                   </p>
                 </div>
                 <button
                   onClick={() => setShowCalendarPicker(!showCalendarPicker)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-xs sm:text-sm"
                 >
-                  <Calendar size={20} />
-                  Pick Date
+                  <Calendar size={16} className="sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Pick Date</span>
+                  <span className="sm:hidden">Pick</span>
                 </button>
               </div>
 
               <button
                 onClick={goToNextDay}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
               >
-                <ChevronRight size={24} />
+                <ChevronRight size={20} className="sm:w-6 sm:h-6" />
               </button>
             </div>
 
@@ -312,8 +303,6 @@ const Workouts: FC = () => {
               goToPreviousMonth={goToPreviousMonth}
               goToNextMonth={goToNextMonth}
               goToTodayInCalendar={goToTodayInCalendar}
-              getFirstDayOfMonth={getFirstDayOfMonth}
-              getDaysInMonth={getDaysInMonth}
               selectDateFromCalendar={selectDateFromCalendar}
               getWorkoutsForDate={getWorkoutsForDate}
             />}
@@ -322,9 +311,9 @@ const Workouts: FC = () => {
 
         {/* Create/Edit Form */}
         {(isCreating || editingId) && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+            <div className="flex items-center justify-between mb-4 gap-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                 {editingId ? 'Edit Workout' : 'Create New Workout'}
               </h2>
               <button
@@ -333,13 +322,13 @@ const Workouts: FC = () => {
                   setEditingId(null);
                   resetForm();
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 flex-shrink-0"
               >
                 <X size={24} />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Workout Name
@@ -366,13 +355,11 @@ const Workouts: FC = () => {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Exercises
-                  </label>
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <label className="text-sm font-medium text-gray-700">Exercises</label>
                   <button
                     onClick={addExercise}
-                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
                   >
                     <Plus size={16} />
                     Add Exercise
@@ -380,51 +367,44 @@ const Workouts: FC = () => {
                 </div>
 
                 {formData.exercises.length > 0 && (
-                  <div className="flex gap-2 mb-2">
-                    <label className="text-sm font-medium text-gray-700 w-[16vw]">Name</label>
-                    <label className="text-sm font-medium text-gray-700 w-[4vw]">Sets</label>
-                    <label className="text-sm font-medium text-gray-700 w-[4vw]">Reps</label>
-                    <label className="text-sm font-medium text-gray-700 w-[4vw]">Weight</label>
-                    <div className="w-[40px]"></div>
+                  <div className="grid grid-cols-12 gap-2 sm:gap-3 mb-2">
+                    <div className="col-span-5 sm:col-span-5">
+                      <p className="text-xs sm:text-sm font-medium text-gray-700">Name</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs sm:text-sm font-medium text-gray-700">Sets</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs sm:text-sm font-medium text-gray-700">Reps</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs sm:text-sm font-medium text-gray-700">Weight</p>
+                    </div>
+                    <div className="col-span-1"></div>
                   </div>
                 )}
 
                 {formData.exercises.map((exercise, index) => (
-                  <div key={index} className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={exercise.name}
-                      onChange={(e) => updateExercise(index, 'name', e.target.value)}
-                      placeholder="Exercise name"
-                      className="text-gray-700 w-[16vw] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <input
-                      type="number"
-                      value={exercise.sets}
-                      onChange={(e) => updateExercise(index, 'sets', e.target.value)}
-                      placeholder="Sets"
-                      className="text-gray-700 w-[4vw] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <input
-                      type="number"
-                      value={exercise.reps}
-                      onChange={(e) => updateExercise(index, 'reps', e.target.value)}
-                      placeholder="Reps"
-                      className="text-gray-700 w-[4vw] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <input
-                      type="number"
-                      value={exercise.weight}
-                      onChange={(e) => updateExercise(index, 'weight', e.target.value)}
-                      placeholder="Weight"
-                      className="text-gray-700 w-[6vw] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <button
-                      onClick={() => removeExercise(index)}
-                      className="text-red-600 hover:text-red-700 w-[40px] flex items-center justify-center"
-                    >
-                      <X size={20} />
-                    </button>
+                  <div key={index} className="grid grid-cols-12 gap-2 sm:gap-3 mb-2 items-end">
+                    <div className="col-span-5">
+                      {createUpdateExerciseField(exercise, index, 'name', 'text')}
+                    </div>
+                    <div className="col-span-2">
+                      {createUpdateExerciseField(exercise, index, 'sets', 'number')}
+                    </div>
+                    <div className="col-span-2">
+                      {createUpdateExerciseField(exercise, index, 'reps', 'number')}
+                    </div>
+                    <div className="col-span-2">
+                      {createUpdateExerciseField(exercise, index, 'weight', 'number')}
+                    </div>
+                    <div className="col-span-1 flex items-center justify-center h-full">
+                      <button
+                        onClick={() => removeExercise(index)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center w-full h-full"
+                      >Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -443,10 +423,10 @@ const Workouts: FC = () => {
                 />
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
                 <button
                   onClick={() => editingId ? updateWorkout(editingId) : createWorkout()}
-                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
                   <Check size={20} />
                   {editingId ? 'Update Workout' : 'Create Workout'}
@@ -457,7 +437,7 @@ const Workouts: FC = () => {
                     setEditingId(null);
                     resetForm();
                   }}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
                 >
                   Cancel
                 </button>
@@ -466,21 +446,21 @@ const Workouts: FC = () => {
           </div>
         )}
 
-        {/* Workouts List */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Workouts for {formatDisplayDate(selectedDate)}
+        <div className="mt-6 sm:mt-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
+            Workouts for {DatesLibrary.formatDisplayDate(selectedDate)}
           </h2>
           <div className="space-y-4">
             {getWorkoutsForDate(selectedDate).length === 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No workouts today</h3>
-                <p className="text-gray-600 mb-4">Create a new workout or select a different date!</p>
+              <div className="bg-white rounded-lg shadow-md p-8 sm:p-12 text-center">
+                <Calendar size={40} className="sm:w-12 sm:h-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No workouts today</h3>
+                <p className="text-sm sm:text-base text-gray-600 mb-4">Create a new workout or select a different date!</p>
               </div>
             ) : (
               getWorkoutsForDate(selectedDate).map((workout) => (
                 <ListedWorkout
+                  key={workout.id}
                   workout={workout}
                   getExpandedId={() => expandedId}
                   setExpandedId={setExpandedId}

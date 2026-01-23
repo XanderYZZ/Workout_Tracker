@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DatesLibrary } from "../lib/dates";
 
 export const CalendarPicker: FC<CalendarPickerProps> = ({
     goToPreviousMonth,
@@ -7,8 +8,6 @@ export const CalendarPicker: FC<CalendarPickerProps> = ({
     goToTodayInCalendar,
     calendarDate,
     selectedDate,
-    getFirstDayOfMonth,
-    getDaysInMonth,
     selectDateFromCalendar,
     getWorkoutsForDate
 }) => {
@@ -45,10 +44,10 @@ export const CalendarPicker: FC<CalendarPickerProps> = ({
 
                 {/* Calendar days */}
                 <div className="grid grid-cols-7 gap-2">
-                    {Array.from({ length: getFirstDayOfMonth(calendarDate) }).map((_, i) => (
+                    {Array.from({ length: DatesLibrary.getFirstDayOfMonth(calendarDate) }).map((_, i) => (
                         <div key={`empty-${i}`} className="aspect-square"></div>
                     ))}
-                    {Array.from({ length: getDaysInMonth(calendarDate) }).map((_, i) => {
+                    {Array.from({ length: DatesLibrary.getDaysInMonth(calendarDate) }).map((_, i) => {
                         const day = i + 1;
                         const date = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), day);
                         const isSelected =

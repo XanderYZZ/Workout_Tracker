@@ -66,8 +66,6 @@ interface CalendarPickerProps {
     goToTodayInCalendar: () => void;
     calendarDate: Date;
     selectedDate: Date;
-    getFirstDayOfMonth: (date: Date) => number;
-    getDaysInMonth: (date: Date) => number;
     selectDateFromCalendar: (day: number) => void;
     getWorkoutsForDate: (date: Date) => any[];
 }
