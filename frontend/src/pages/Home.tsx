@@ -2,6 +2,13 @@ import type { FC } from 'react'
 import { Link } from "react-router-dom";
 import { Navbar } from "../components/navbar.tsx";
 import '../index.css'
+import { ImageCarousel } from "../components/ImageCarousel";
+
+const photos = [
+  { src: "/Home/Creation.png" },
+  { src: "/Home/VolumeReport.png" },
+  { src: "/Home/Workouts.png" },
+];
 
 const Home: FC = () => {
     return (
@@ -9,9 +16,11 @@ const Home: FC = () => {
             <Navbar></Navbar>
             <main>
                 <section className="relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/30 via-purple-600/20 to-pink-600/20 blur-3xl" />
-
-                    <div className="relative max-w-6xl mx-auto px-6 py-32 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 via-purple-600/20 to-pink-600/20 blur-3xl" />
+                    <section className="max-w-7xl mx-auto px-6 py-24">
+                        <ImageCarousel photos={photos} />
+                    </section>
+                    <div className="relative max-w-7xl transform translate-y-[-60px] mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                         <div>
                             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-none tracking-tight">
                                 Train smarter.
@@ -35,7 +44,7 @@ const Home: FC = () => {
                 </section>
 
                 <section className="bg-slate-900 border-t border-white/10">
-                    <div className="max-w-6xl mx-auto px-6 py-24 grid grid-cols-1 sm:grid-cols-3 gap-8">
+                    <div className="max-w-6xl mx-auto px-6 py-16 grid grid-cols-1 sm:grid-cols-3 gap-8">
                         {[
                             ['Log workouts', 'Fast input for sets, reps, and weights.'],
                             ['See progress', 'Visualize strength gains over time.'],
