@@ -6,11 +6,9 @@ from lib.database_lib import models
 from lib.database_lib import auth_helper 
 from lib.database_lib import database 
 from datetime import datetime, timezone
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from config import limiter
 
 router = APIRouter(tags=["workouts"], prefix="/workouts")
-limiter = Limiter(key_func=get_remote_address)
 MAXIMUM_WORKOUTS_PER_DAY = os.getenv("MAXIMUM_WORKOUTS_PER_DAY", 5)
 
 # CREATE

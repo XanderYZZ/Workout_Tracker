@@ -1,14 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
 from routers import (auth, workouts, reports, settings,)
+from config import limiter
 
 app = FastAPI(title="Workout Tracker",)
 
-limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 
 @app.exception_handler(RateLimitExceeded)

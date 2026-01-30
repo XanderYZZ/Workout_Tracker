@@ -2,12 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 import lib.database_lib.database as database
 import lib.database_lib.models as models
 import lib.database_lib.auth_helper as auth_helper
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from config import limiter
 from lib.misc import dates
 
 router = APIRouter(tags=["reports"], prefix="/reports")
-limiter = Limiter(key_func=get_remote_address)
 
 # ALL EXERCISES EVER LOGGED
 @router.get("/exercises", response_model=models.AllExercisesReport)

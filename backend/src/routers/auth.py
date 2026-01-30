@@ -3,11 +3,10 @@ import lib.database_lib.database as database
 import lib.database_lib.models as models
 import lib.database_lib.auth_helper as auth_helper
 import os
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from config import limiter
+from lib.error_handler import APIError, ErrorMessage
 
 router = APIRouter(tags=["auth"], prefix="/auth")
-limiter = Limiter(key_func=get_remote_address)
 REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS"))
 
 def ResponseSetCookieHelper(response: Response, refresh_token: str): 

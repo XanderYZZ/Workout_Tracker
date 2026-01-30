@@ -1,13 +1,12 @@
-from fastapi import APIRouter, status, Depends, HTTPException, Request
+from fastapi import APIRouter, status, Depends, Request
 import lib.database_lib.database as database
 import lib.database_lib.models as models
 import lib.database_lib.auth_helper as auth_helper
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from config import limiter
 from lib.misc import dates
+from lib.error_handler import APIError, ErrorMessage
 
 router = APIRouter(tags=["settings"], prefix="/settings")
-limiter = Limiter(key_func=get_remote_address)
 
 # GET ALL SETTINGS
 @router.get("/", response_model=models.UserSettings, status_code=status.HTTP_200_OK)
@@ -19,7 +18,7 @@ async def GetAllSettings(
     user_details = database.GetAllUserDetails(current_user.email)
 
     if not user_details:
-        raise HTTPException(status_code=500, detail="Failed to get settings")
+        raise APIError.server_error(ErrorMessage.FAILED_TO_RETRIEVE)
 
     return models.UserSettings(
         bodyweight=user_details["bodyweight"]
@@ -36,6 +35,6 @@ async def UpdateBodyweight(
     result = database.UpdateBodyweight(current_user.email, payload.bodyweight)
 
     if not result:
-        raise HTTPException(status_code=500, detail="Failed to update bodyweight") 
+        raise APIError.server_error(ErrorMessage.FAILED_TO_UPDATE)
     
     return models.BodyweightUpdate(bodyweight=payload.bodyweight)
