@@ -16,6 +16,12 @@ class CurrentUser(BaseModel):
     user_id: str
     email: str
 
+class BodyweightUpdate(BaseModel):
+    bodyweight: float = 0
+
+class UserSettings(BaseModel):
+    bodyweight: float = 0
+
 class ExerciseInWorkout(BaseModel):
     name: str
     sets: int

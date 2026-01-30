@@ -1,3 +1,4 @@
+import os
 from typing import List, Optional
 from bson import ObjectId
 from fastapi import Query, Request, status, APIRouter, Depends, HTTPException
@@ -10,7 +11,7 @@ from slowapi.util import get_remote_address
 
 router = APIRouter(tags=["workouts"], prefix="/workouts")
 limiter = Limiter(key_func=get_remote_address)
-MAXIMUM_WORKOUTS_PER_DAY = 5
+MAXIMUM_WORKOUTS_PER_DAY = os.getenv("MAXIMUM_WORKOUTS_PER_DAY", 5)
 
 # CREATE
 @router.post("/", response_model=models.WorkoutResponse, status_code=status.HTTP_201_CREATED)

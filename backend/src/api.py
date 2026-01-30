@@ -4,7 +4,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
-from routers import (auth, workouts, reports,)
+from routers import (auth, workouts, reports, settings,)
 
 app = FastAPI(title="Workout Tracker",)
 
@@ -34,6 +34,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(workouts.router)
 app.include_router(reports.router)
+app.include_router(settings.router)
 
 @app.get("/")
 async def root():

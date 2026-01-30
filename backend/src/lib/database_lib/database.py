@@ -31,6 +31,11 @@ def CreateUser(email: str, username: str, hashed_password: str) -> str:
     
     return str(result.inserted_id)  
 
+def GetAllUserDetails(email: str):
+    users = GetDb()["users"]
+
+    return users.find_one({"email": email})
+
 def GetUserIdByEmail(email: str) -> str | None:
     users = GetDb()["users"]
     user = users.find_one({"email": email}, {"_id": 1})
@@ -129,15 +134,33 @@ def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
     
     return count
 
+def UpdateBodyweight(email: str, bodyweight: float = 0) -> bool:
+    users = GetDb()["users"]
+    user_filter = {"email": email}
+    update = {"$set": {"bodyweight": bodyweight,}}
+
+    try:
+        users.update_one(
+            user_filter,
+            update
+        )
+
+        return True
+    except Exception as e:
+        return False
+
 def UpdateWorkout(workout_id: str, user_id: str, update_data: Dict) -> bool:
     workouts = GetDb()["workouts"]
 
-    result = workouts.update_one(
-        {"_id": ObjectId(workout_id), "user_id": user_id},
-        {"$set": update_data}
-    )
+    try:
+        workouts.update_one(
+            {"_id": ObjectId(workout_id), "user_id": user_id},
+            {"$set": update_data}
+        )
 
-    return result.modified_count > 0
+        return True
+    except Exception as e:
+        return False
 
 def DeleteWorkout(workout_id: str, user_id: str) -> bool:
     workouts = GetDb()["workouts"]

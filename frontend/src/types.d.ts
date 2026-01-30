@@ -5,6 +5,10 @@ interface User {
   exp?: number;
 }
 
+interface Settings {
+  bodyweight: number;
+}
+
 interface Exercise {
   name: string;
   sets: number;
