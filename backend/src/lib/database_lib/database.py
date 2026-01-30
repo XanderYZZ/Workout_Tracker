@@ -255,6 +255,7 @@ def GetRefreshTokenInfo(token_hash: str) -> Optional[Dict]:
         return {
             "user_id": token["user_id"],
             "email": token["email"],
+            "username": token["username"],
             "device_fingerprint": token.get("device_fingerprint"),
             "token_id": str(token["_id"])
         }
