@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Workouts from './pages/Workouts';
 import Reports from './pages/Reports';
 import ErrorPage from './pages/ErrorPage';
+import Settings from './pages/Settings';
 import ProtectedRoute from './wrappers/protected_route';
 
 function Layout() {
@@ -56,7 +57,15 @@ function App() {
               <Reports />
             </ProtectedRoute>
           ),
-        }
+        },
+        {
+          path: "settings",
+          element: (
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          )
+        },
       ],
     },
   ]);

@@ -50,18 +50,19 @@ def GenerateDeviceFingerprint(request: Request) -> str:
 
     return hashlib.sha256(fingerprint_str.encode()).hexdigest()
     
-def CreateAccessToken(user_id: str, email: str) -> str:
+def CreateAccessToken(user_id: str, email: str, username: str) -> str:
     payload = {
         "sub": user_id,       
         "email": email,       
+        "username": username,
         "iat": datetime.datetime.now(datetime.timezone.utc),
         "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=ACCESS_TOKEN_MINUTES)
     }
 
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-def CreateTokenPair(user_id: str, email: str, device_fingerprint: str) -> tuple:
-    access_token = CreateAccessToken(user_id, email)
+def CreateTokenPair(user_id: str, email: str, username: str, device_fingerprint: str) -> tuple:
+    access_token = CreateAccessToken(user_id, email, username)
     raw_refresh_token, refresh_token_hash = CreateRefreshToken()
     
     expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=REFRESH_TOKEN_DAYS)
@@ -92,13 +93,15 @@ def RefreshAccessToken(raw_refresh_token: str, device_fingerprint: str) -> tuple
     
     user_id = token_info["user_id"]
     email = token_info["email"]
+    username = token_info["username"]
     
     RevokeRefreshToken(raw_refresh_token)
     
     new_access_token, new_refresh_token = CreateTokenPair(
-        user_id, 
-        email, 
-        device_fingerprint, 
+        user_id=user_id, 
+        email=email, 
+        username=username,
+        device_fingerprint=device_fingerprint, 
     )
     
     return new_access_token, new_refresh_token

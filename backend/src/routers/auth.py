@@ -34,7 +34,8 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
     hashed_password = auth_helper.GetPasswordHash(user.password)
     user_id = database.CreateUser(user.email, user.username, hashed_password)
     device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
-    access_token, refresh_token = auth_helper.CreateTokenPair(user_id, user.email, device_fingerprint)
+    access_token, refresh_token = auth_helper.CreateTokenPair(user_id, user.email, 
+                                                              username=user.username, device_fingerprint=device_fingerprint)
     
     ResponseSetCookieHelper(response, refresh_token)
     
@@ -61,7 +62,8 @@ async def Login(request: Request, user: models.UserLogin, response: Response):
     
     user_id = database.GetUserIdByEmail(email)
     device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
-    access_token, refresh_token = auth_helper.CreateTokenPair(user_id, email, device_fingerprint)
+    access_token, refresh_token = auth_helper.CreateTokenPair(user_id, email, 
+                                                              username=username, device_fingerprint=device_fingerprint)
     
     ResponseSetCookieHelper(response, refresh_token)
     

@@ -68,6 +68,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser({
           _id: decoded.sub,
           email: decoded.email,
+          username: decoded.username,
           exp: decoded.exp,
         });
       } else {
