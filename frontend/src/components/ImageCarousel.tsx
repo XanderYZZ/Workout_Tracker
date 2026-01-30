@@ -11,7 +11,7 @@ type Props = {
 
 export const ImageCarousel: FC<Props> = ({
   photos,
-  interval = 5000,
+  interval = 2000,
 }) => {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);

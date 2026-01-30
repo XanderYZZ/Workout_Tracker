@@ -67,7 +67,11 @@ export const Navbar = () => {
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
                                     className="w-9 h-9 bg-blue-400 hover:bg-blue-500 text-white font-bold rounded-lg shadow-lg transition-colors flex items-center justify-center"
                                 >
-                                    <img className="w-12 h-12 transform translate-y-[3px]" src="/navbar/arrow.png" alt="Profile"></img>
+                                    <img
+                                        className={`w-6 h-6 transform translate-y-[${dropdownOpen ? -2 : 2}px] transform transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : 'rotate-0'}`}
+                                        src="/navbar/arrow.png"
+                                        alt="Profile"
+                                    ></img>
                                 </button>
                             </div>
 
