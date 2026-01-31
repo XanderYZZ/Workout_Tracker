@@ -68,7 +68,11 @@ export const Navbar = () => {
                                     className="w-9 h-9 bg-blue-400 hover:bg-blue-500 text-white font-bold rounded-lg shadow-lg transition-colors flex items-center justify-center"
                                 >
                                     <img
-                                        className={`w-6 h-6 transform translate-y-[${dropdownOpen ? -2 : 2}px] transform transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : 'rotate-0'}`}
+                                        style={{
+                                            transform: `translateY(${dropdownOpen ? -2 : 2}px) rotate(${dropdownOpen ? 180 : 0}deg)`,
+                                            transition: 'transform 300ms ease-in-out'
+                                        }}
+                                        className="w-6 h-6"
                                         src="/navbar/arrow.png"
                                         alt="Profile"
                                     ></img>
