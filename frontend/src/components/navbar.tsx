@@ -31,7 +31,7 @@ export const Navbar = () => {
                     Workout Tracker
                 </span>
 
-                <nav className="flex justify-end items-center gap-1">
+                <nav className="flex justify-end items-center gap-2">
                     {(user && Object.keys(user).length != 0) ? <>
                         {(pathname != "/") ? <>
                             <Link to="/">
@@ -108,14 +108,14 @@ export const Navbar = () => {
                         // For if the user is not logged in.
                         : <><Link
                             to="/login"
-                            className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                            className="text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10"
                         >
                             Login
                         </Link>
                             <Link to="/signup">
-                                <label className="text-white-900 px-4 py-2 rounded-full bg-indigo-500 font-medium hover:bg-indigo-400 transition">
+                                <button className="text-white px-4 py-2 rounded-lg bg-indigo-600 font-medium hover:bg-indigo-500 active:bg-indigo-700 transition-all">
                                     Sign Up
-                                </label>
+                                </button>
                             </Link></>}
                 </nav>
             </div>
