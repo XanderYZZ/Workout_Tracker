@@ -1,8 +1,13 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
-from routers import auth, workouts, reports, settings
+from .routers import auth, workouts, reports, settings
 from config import limiter
 
 app = FastAPI(title="Workout Tracker",)
@@ -40,6 +45,6 @@ app.include_router(settings.router)
 async def root():
     return {"Detail": "This is a workout tracker."}
 
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="localhost", port=8000, reload=True)
+    uvicorn.run("app:app", host="localhost", port=8000, reload=True)"""
