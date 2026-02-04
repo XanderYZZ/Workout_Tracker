@@ -8,7 +8,7 @@ interface FormProps extends FormHTMLAttributes<HTMLFormElement> {
 export const Form: FC<FormProps> = ({ children, ...props }) => {
     return (
         <div>
-            <div className="form-background">
+            <div className="card-background">
                 <form {...props}>
                     {children}  
                 </form>

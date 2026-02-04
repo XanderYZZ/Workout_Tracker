@@ -10,6 +10,31 @@ import { DatesLibrary } from "../lib/dates";
 import { Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { Notifications } from "../lib/notifications";
 
+type CustomTickProps = {
+    x?: number;
+    y?: number;
+    payload?: {
+        value: string;
+    };
+};
+
+const CustomXAxisTick: FC<CustomTickProps> = ({ x = 0, y = 0, payload }) => {
+    if (!payload) return null;
+
+    return (
+        <text
+            x={x}
+            y={y}
+            fill="#ffffff"
+            textAnchor="end"
+            transform={`rotate(-55, ${x}, ${y})`}
+            dy={10}
+        >
+            {payload.value}
+        </text>
+    );
+};
+
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
     type REPORT_TYPE_OPEN = "contains" | "volume" | "1rm";
@@ -250,11 +275,35 @@ const Reports: FC = () => {
 
     const createGraph = () => {
         return (
-            <ResponsiveContainer width="100%" height={calculateChartHeight(graphData.length)}>
-                <LineChart data={graphData} margin={{ top: 20, right: 20, left: 0, bottom: 70 }}>
-                    <XAxis dataKey="name" interval={0} height={60} tick={{ textAnchor: 'end' }} />
-                    <YAxis width={60} />
-                    <Line type="monotone" dataKey="amount" stroke="#8884d8" />
+            <ResponsiveContainer
+                width="100%"
+                height={calculateChartHeight(graphData.length)}
+            >
+                <LineChart
+                    data={graphData}
+                    margin={{ top: 20, right: 20, left: 0, bottom: 80 }}
+                >
+                    <XAxis
+                        dataKey="name"
+                        interval={0}
+                        height={60}
+                        tick={<CustomXAxisTick />}
+                    />
+
+                    <YAxis
+                        width={60}
+                        tick={{
+                            fill: "#ffffff",
+                        }}
+                    />
+
+                    <Line
+                        type="monotone"
+                        dataKey="amount"
+                        stroke="#ffffff"
+                        strokeWidth={2}
+                        dot={{ fill: "#ffffff" }}
+                    />
                 </LineChart>
             </ResponsiveContainer>
         );
@@ -362,7 +411,7 @@ const Reports: FC = () => {
                                 </button>
                                 {volumeReportTotal !== null && !isEqual(graphData, defaultGraphData) && (
                                     <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
-                                        <h2 className="text-xl font-semibold text-gray-600">
+                                        <h2 className="text-xl font-semibold text-white-600">
                                             Total volume {volumeReportExercise ? `for ${volumeReportExercise}` : "for all exercises"}: {volumeReportTotal.toLocaleString()} lbs
                                         </h2>
                                         {createGraph()}
@@ -386,7 +435,7 @@ const Reports: FC = () => {
                                 </button>
                                 {oneRepMaxExercise !== "" && !isEqual(graphData, defaultGraphData) && (
                                     <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
-                                        <h2 className="text-xl font-semibold text-gray-600">
+                                        <h2 className="text-xl font-semibold text-white-600">
                                             {`1RM over time for ${oneRepMaxExercise}:`}
                                         </h2>
                                         {createGraph()}

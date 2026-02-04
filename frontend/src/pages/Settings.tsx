@@ -16,7 +16,6 @@ const Settings: FC = () => {
 
                 if (response.status == 200) {
                     setSettings(response.data);
-                    setMessage({ type: 'success', text: 'Fetched settings!' });
                 } else {
                     setMessage({ type: 'error', text: 'Error fetching settings' });
                 }
@@ -65,16 +64,16 @@ const Settings: FC = () => {
 
     return (
         <>
-            <div className="min-h-screen bg-gradient-to-br from-slate-950 to-slate-900 flex items-center justify-center px-4 py-8">
+            <div className="background-primary flex items-center justify-center">
                 <div className="max-w-md w-full">
-                    <div className="bg-slate-900/80 backdrop-blur border border-white/10 rounded-2xl shadow-2xl p-8">
+                    <div className="card-background">
                         <div className="relative mb-6">
                             <div className="absolute left-0 top-0">
                                 <BackButton />
                             </div>
                             <h1 className="text-2xl font-bold text-white text-center">Settings</h1>
                         </div>
-                        <p className="text-gray-400 text-center mb-8">Manage your profile information</p>
+                        <p className="text-gray-300 text-center mb-8">Manage your profile information</p>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="bg-slate-800/50 border border-white/10 rounded-lg p-4 mb-6">

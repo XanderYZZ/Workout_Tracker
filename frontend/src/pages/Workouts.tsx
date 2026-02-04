@@ -426,7 +426,7 @@ const Workouts: FC = () => {
         )}
 
         <div className="mt-6 sm:mt-8">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-white-600 mb-4">
             Workouts for {DatesLibrary.formatDisplayDate(selectedDate)}
           </h2>
           <div className="space-y-4">

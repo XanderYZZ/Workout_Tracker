@@ -27,7 +27,7 @@ export const Navbar = () => {
         const isActive = pathname === path;
         const baseClass = "px-4 py-2 rounded-lg text-sm font-medium transition-all";
         const inactiveClass = "text-white hover:bg-white/10 active:bg-white/20";
-        const activeClass = "text-indigo-300 bg-white/10 border-b-2 border-indigo-400 shadow-lg shadow-indigo-500/20";
+        const activeClass = "text-blue-200 bg-white/10 border-b-2 border-blue-800 shadow-lg shadow-blue-400/20";
 
         return `${baseClass} ${isActive ? activeClass : inactiveClass}`;
     };
