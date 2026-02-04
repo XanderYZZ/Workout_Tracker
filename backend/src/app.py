@@ -22,8 +22,8 @@ async def rate_limit_handler(request, exc):
     )
 
 origins = [
-    "http://localhost:5173",  # dev frontend
-    "https://workout-tracker-beta-five.vercel.app",  # prod frontend
+    "http://localhost:5173",  # Dev frontend
+    "https://workout-tracker-beta-five.vercel.app",  # Prod frontend
 ]
 
 app.add_middleware(
