@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
-from routers import auth, workouts, reports, settings
-from config import limiter
+from src.routers import auth, workouts, reports, settings
+from src.config import limiter
 
 app = FastAPI(title="Workout Tracker",)
 
