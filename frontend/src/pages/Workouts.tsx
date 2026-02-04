@@ -441,7 +441,7 @@ const Workouts: FC = () => {
                 <ListedWorkout
                   key={workout.id}
                   workout={workout}
-                  getExpandedId={() => expandedId}
+                  expandedId={expandedId}
                   setExpandedId={setExpandedId}
                   startEdit={startEdit}
                   deleteWorkout={deleteWorkout}

@@ -7,42 +7,12 @@ import { ExerciseDropdown } from "../components/exercise_dropdown";
 import { ListedWorkout } from "../components/listed_workout";
 import { CalendarPicker } from "../components/calendar_picker";
 import { DatesLibrary } from "../lib/dates";
-import { Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { Notifications } from "../lib/notifications";
-
-type CustomTickProps = {
-    x?: number;
-    y?: number;
-    payload?: {
-        value: string;
-    };
-};
-
-const CustomXAxisTick: FC<CustomTickProps> = ({ x = 0, y = 0, payload }) => {
-    if (!payload) return null;
-
-    return (
-        <text
-            x={x}
-            y={y}
-            fill="#ffffff"
-            textAnchor="end"
-            transform={`rotate(-55, ${x}, ${y})`}
-            dy={10}
-        >
-            {payload.value}
-        </text>
-    );
-};
+import { Graph, type GraphPoint, defaultGraphData } from "../components/graph";
 
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
     type REPORT_TYPE_OPEN = "contains" | "volume" | "1rm";
-    type GRAPH_POINT = {
-        name: string;
-        amount: number;
-    };
-    const defaultGraphData: [GRAPH_POINT] = [{ name: "", amount: 0 },];
 
     const [reportType, setReportType] = useState<REPORT_TYPE_OPEN>("contains");
     const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -58,7 +28,7 @@ const Reports: FC = () => {
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-    const [graphData, setGraphData] = useState<GRAPH_POINT[]>(defaultGraphData);
+    const [graphData, setGraphData] = useState<GraphPoint[]>(defaultGraphData);
 
     const setReportTypeToContains = () => setReportType("contains");
     const setReportTypeToVolume = () => setReportType("volume");
@@ -200,7 +170,7 @@ const Reports: FC = () => {
                 return;
             }
 
-            const new_graph_data: GRAPH_POINT[] = Object.entries(per_day).map(
+            const new_graph_data: GraphPoint[] = Object.entries(per_day).map(
                 ([day, amt]) => ({
                     name: DatesLibrary.formatDateToLocaleDateString(day, true, true),
                     amount: amt as number,
@@ -217,11 +187,6 @@ const Reports: FC = () => {
 
     const generate1RMReport = () => {
         generateVolumeOr1RMReport(false);
-    };
-
-    const calculateChartHeight = (dataLength: number) => {
-        // Base height: 320px, add 15px for each data point to accommodate rotated labels
-        return Math.max(320, 320 + (dataLength - 1) * 15);
     };
 
     const createReportTypeButton = (reportTypeForButton: REPORT_TYPE_OPEN, text: string, setReportType: () => void) => {
@@ -273,42 +238,6 @@ const Reports: FC = () => {
         );
     };
 
-    const createGraph = () => {
-        return (
-            <ResponsiveContainer
-                width="100%"
-                height={calculateChartHeight(graphData.length)}
-            >
-                <LineChart
-                    data={graphData}
-                    margin={{ top: 20, right: 20, left: 0, bottom: 80 }}
-                >
-                    <XAxis
-                        dataKey="name"
-                        interval={0}
-                        height={60}
-                        tick={<CustomXAxisTick />}
-                    />
-
-                    <YAxis
-                        width={60}
-                        tick={{
-                            fill: "#ffffff",
-                        }}
-                    />
-
-                    <Line
-                        type="monotone"
-                        dataKey="amount"
-                        stroke="#ffffff"
-                        strokeWidth={2}
-                        dot={{ fill: "#ffffff" }}
-                    />
-                </LineChart>
-            </ResponsiveContainer>
-        );
-    };
-
     return (
         <div className="background-primary min-h-screen">
             <Navbar />
@@ -335,7 +264,7 @@ const Reports: FC = () => {
                     {reportType === "contains" && (
                         <div className="flex justify-center pt-32">
                             <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
-                                <h1 className="text-gray-900 text-lg text-center">
+                                <h1 className="text-white-900 text-lg text-center">
                                     Select an exercise to show all workouts that contain it.
                                 </h1>
 
@@ -385,7 +314,7 @@ const Reports: FC = () => {
                                                 {workouts.map(workout => (
                                                     <ListedWorkout
                                                         workout={workout}
-                                                        getExpandedId={() => expandedId}
+                                                        expandedId={expandedId}
                                                         setExpandedId={setExpandedId}
                                                     />
                                                 ))}
@@ -401,7 +330,7 @@ const Reports: FC = () => {
                     {reportType === "volume" && (
                         <div className="flex justify-center pt-32">
                             <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
-                                <h1 className="text-gray-900 text-lg">Volume Report</h1>
+                                <h1 className="text-white-900 text-lg">Volume Report</h1>
 
                                 {createDateRange()}
                                 {createExerciseDropdown()}
@@ -410,12 +339,7 @@ const Reports: FC = () => {
                                     Generate Report
                                 </button>
                                 {volumeReportTotal !== null && !isEqual(graphData, defaultGraphData) && (
-                                    <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
-                                        <h2 className="text-xl font-semibold text-white-600">
-                                            Total volume {volumeReportExercise ? `for ${volumeReportExercise}` : "for all exercises"}: {volumeReportTotal.toLocaleString()} lbs
-                                        </h2>
-                                        {createGraph()}
-                                    </div>
+                                    <Graph headerText={`Total volume ${volumeReportExercise ? `for ${volumeReportExercise}` : "for all exercises"}: ${volumeReportTotal.toLocaleString()}`} graphData={graphData} />
                                 )}
                             </div>
                         </div>
@@ -425,7 +349,7 @@ const Reports: FC = () => {
                     {reportType === "1rm" && (
                         <div className="flex justify-center pt-32">
                             <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
-                                <h1 className="text-gray-900 text-lg">1RM Report</h1>
+                                <h1 className="text-white-900 text-lg">1RM Report</h1>
 
                                 {createDateRange()}
                                 {createExerciseDropdown()}
@@ -434,12 +358,7 @@ const Reports: FC = () => {
                                     Generate Report
                                 </button>
                                 {oneRepMaxExercise !== "" && !isEqual(graphData, defaultGraphData) && (
-                                    <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
-                                        <h2 className="text-xl font-semibold text-white-600">
-                                            {`1RM over time for ${oneRepMaxExercise}:`}
-                                        </h2>
-                                        {createGraph()}
-                                    </div>
+                                    <Graph headerText={`1RM over time for ${oneRepMaxExercise}:`} graphData={graphData} />
                                 )}
                             </div>
                         </div>

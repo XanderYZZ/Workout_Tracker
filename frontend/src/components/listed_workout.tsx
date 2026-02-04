@@ -5,14 +5,14 @@ import { Calendar, Edit2, Trash2, ChevronDown, ChevronUp, } from 'lucide-react';
 interface ListedWorkoutProps {
     workout: Workout;
     setExpandedId: (id: string | null) => void;
-    getExpandedId: () => string | null;
+    expandedId: string | null;
     startEdit?: (workout: Workout) => void;
     deleteWorkout?: (id: string) => void;
 }
 
 export const ListedWorkout: FC<ListedWorkoutProps> = ({
     workout,
-    getExpandedId,
+    expandedId,
     setExpandedId,
     startEdit,
     deleteWorkout,
@@ -46,10 +46,10 @@ export const ListedWorkout: FC<ListedWorkoutProps> = ({
                     </div>
                     <div className="flex items-center gap-2">
                     <button
-                        onClick={() => setExpandedId(getExpandedId() === workout.id ? null : workout.id)}
+                        onClick={() => setExpandedId(expandedId === workout.id ? null : workout.id)}
                         className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                     >
-                        {getExpandedId() === workout.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        {expandedId === workout.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </button>
                     {startEdit && deleteWorkout && (
                         <>
@@ -70,7 +70,7 @@ export const ListedWorkout: FC<ListedWorkoutProps> = ({
                     </div>
                 </div>
 
-                {getExpandedId() === workout.id && (
+                {expandedId === workout.id && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="bg-gray-50 rounded p-3 text-sm mb-2">
                         <div className="font-medium text-gray-900 mb-0">
