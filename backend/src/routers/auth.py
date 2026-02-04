@@ -98,9 +98,9 @@ async def Logout(request: Request, response: Response, current_user: models.Curr
 
     response.delete_cookie(
         key="refresh_token",
-        httponly=True,
-        secure=os.getenv("ENVIRONMENT") == "production",
-        samesite="lax"
+        path="/",
+        secure=True,
+        samesite="none"
     )
 
     return {"message": "Logged out successfully"}
