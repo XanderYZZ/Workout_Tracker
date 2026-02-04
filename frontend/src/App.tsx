@@ -13,6 +13,7 @@ import Reports from './pages/Reports';
 import ErrorPage from './pages/ErrorPage';
 import Settings from './pages/Settings';
 import ProtectedRoute from './wrappers/protected_route';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 function Layout() {
   return (
@@ -70,7 +71,12 @@ function App() {
     },
   ]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <SpeedInsights />
+    </>
+  );
 }
 
 export default App
