@@ -9,16 +9,17 @@ from lib.misc.error_handler import APIError, ErrorMessage
 router = APIRouter(tags=["auth"], prefix="/auth")
 REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS"))
 
-def ResponseSetCookieHelper(response: Response, refresh_token: str): 
+def ResponseSetCookieHelper(response: Response, refresh_token: str):
+    is_production = os.getenv("ENVIRONMENT") == "production"
+
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=os.getenv("ENVIRONMENT") == "production",
-        samesite="lax",
+        secure=is_production,               
+        samesite="none" if is_production else "lax",
         path="/",
         max_age=REFRESH_TOKEN_DAYS * 24 * 60 * 60,
-        domain=None
     )
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
