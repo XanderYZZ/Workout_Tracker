@@ -7,7 +7,7 @@ import random
 grandparent_dir = Path(__file__).resolve().parents[1]
 sys.path.append(str(grandparent_dir))
 
-from api import app
+from backend.api import app
 
 client = TestClient(app)
 

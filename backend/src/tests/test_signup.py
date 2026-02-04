@@ -6,7 +6,7 @@ import pytest
 grandparent_dir = Path(__file__).resolve().parents[1]
 sys.path.append(str(grandparent_dir))
 
-import api # This import has to be right here.
+import backend.api as api # This import has to be right here.
 
 client = TestClient(api.app)
 
