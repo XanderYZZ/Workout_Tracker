@@ -6,12 +6,10 @@ import lib.database_lib.auth_helper as auth_helper
 import os
 from config import limiter
 from lib.misc.error_handler import APIError, ErrorMessage
-import emailable
 
 router = APIRouter(tags=["auth"], prefix="/auth")
 REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS"))
 IS_PRODUCTION = os.getenv("ENVIRONMENT") == "production"
-emailable_client = emailable.Client(api_key=os.getenv("EMAIL_KEY"))
 
 def ResponseSetCookieHelper(response: Response, refresh_token: str):
     response.set_cookie(
@@ -40,11 +38,6 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
     
     if not auth_helper.IsPasswordStrong(user.password):
         raise APIError.validation_error(ErrorMessage.PASSWORD_WEAK)
-    
-    emailable_result = emailable_client.verify(email=user.email)
-
-    if emailable_result.get('state') != 'deliverable':
-        raise APIError.validation_error("Email could not be validated as existing.")
 
     hashed_password = auth_helper.GetPasswordHash(user.password)
     success = auth_helper.sendVerificationEmail(user.email, user.username, hashed_password)
