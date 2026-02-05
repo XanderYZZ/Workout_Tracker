@@ -56,7 +56,7 @@ def GetWorkoutsForUser(user_id: str,
         if end_date:
             filter_query["scheduled_date"]["$lte"] = end_date
 
-    cursor = workouts.find(filter_query)
+    cursor = workouts.find(filter_query) \
                     .sort("scheduled_date", -1  ) \
                     .skip(skip) \
                     .limit(limit)
