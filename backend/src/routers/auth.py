@@ -102,7 +102,7 @@ async def VerifyUser(request: Request, auth_request_user: models.AuthRequestUser
         token_type="bearer"
     )
 
-@router.post("/login", status_code=status.HTTP_200_OK)
+@router.post("/login", response_model=models.TokenResponse, status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")
 async def Login(request: Request, user: models.UserLogin, response: Response):
     email = user_methods.GetUserEmailByEmailOrUsername(user.email_or_username)
@@ -128,7 +128,7 @@ async def Login(request: Request, user: models.UserLogin, response: Response):
         token_type="bearer"
     )
 
-@router.post("/refresh", status_code=status.HTTP_200_OK)
+@router.post("/refresh", response_model=models.TokenResponse, status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")
 async def Refresh(request: Request, response: Response):
     refresh_token = request.cookies.get("refresh_token")
