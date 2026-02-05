@@ -68,19 +68,26 @@ def EnsureIndexes() -> None:
 
 # Both the email and the username must be unique at this point in time.
 # This might change in the future.
-def DoesUserExist(email: str | None = None, username: str | None = None) -> bool:
-    users = GetDb()["users"]
-    pending_users = GetDb()["pending_users"]
-
+def IsUserInUsersCollection(users_collection, email: str | None = None, username: str | None = None) -> bool:
     if email:
-        if users.find_one({"email": email}) or pending_users.find_one({"email": email}):
+        if users_collection.find_one({"email": email}):
             return True
 
     if username:
-        if users.find_one({"username": username}) or pending_users.find_one({"username": username}):
+        if users_collection.find_one({"username": username}):
             return True
-
+        
     return False
+
+def DoesPendingUserExist(email: str | None = None, username: str | None = None) -> bool:
+    pending_users = GetDb()["pending_users"]
+
+    return IsUserInUsersCollection(pending_users, email, username)
+
+def DoesVerifiedUserExist(email: str | None = None, username: str | None = None) -> bool:
+    users = GetDb()["users"]
+
+    return IsUserInUsersCollection(users, email, username)
 
 def GetPendingUserByEmail(email: str) -> Optional[Dict]:
     pending_users = GetDb()["pending_users"]
@@ -91,8 +98,11 @@ def DeletePendingUserByEmail(email: str) -> None:
     pending_users.delete_one({"email": email})
 
 def CreateUser(email: str, username: str, hashed_password: str, verification_token: str | None = None) -> str:
-    if DoesUserExist(email, username):
-        raise ValueError("User already exists") 
+    if verification_token and DoesPendingUserExist(email, username):
+        raise ValueError("Pending user already exists") 
+    
+    if DoesVerifiedUserExist(email, username):
+        raise ValueError("Verified user already exists") 
 
     collection = GetDb()["users"] if not verification_token else GetDb()["pending_users"]
     data = {"email": email, "username": username, "password": hashed_password}

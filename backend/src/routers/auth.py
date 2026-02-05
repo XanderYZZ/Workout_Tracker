@@ -34,7 +34,7 @@ def ResponseDeleteCookieHelper(response: Response):
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")
 async def SignUp(request: Request, user: models.UserCreate, response: Response):
-    if user_methods.DoesUserExist(user.email, user.username):
+    if user_methods.DoesPendingUserExist(user.email, user.username) or user_methods.DoesVerifiedUserExist(user.email, user.username):
         raise APIError.conflict(ErrorMessage.USER_ALREADY_EXISTS)
     
     if not auth_helper.IsPasswordStrong(user.password):
@@ -104,7 +104,7 @@ async def Login(request: Request, user: models.UserLogin, response: Response):
     email = user_methods.GetUserEmailByEmailOrUsername(user.email_or_username)
     username = user_methods.GetUsernameByEmail(email)
 
-    if not user_methods.DoesUserExist(email, username):
+    if not user_methods.DoesVerifiedUserExist(email, username):
         raise APIError.validation_error(ErrorMessage.INVALID_CREDENTIALS)
 
     hashed_password = user_methods.GetUserHashedPasswordInDB(email)

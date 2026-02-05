@@ -174,10 +174,10 @@ async def GetCurrentUser(authorization : str = Header(...)) -> models.CurrentUse
             detail="Invalid token"
         )
     
-    if not user_methods.DoesUserExist(email):
+    if not user_methods.DoesVerifiedUserExist(email):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User no longer exists"
+            detail="Verified user does not exist"
         )
     
     return models.CurrentUser(user_id=user_id, email=email)
