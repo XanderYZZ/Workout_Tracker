@@ -36,6 +36,7 @@ const AuthContext = createContext<AuthContextType>({
   signup: async () => { },
   login: async () => { },
   logout: async () => { },
+  authenticate: async () => {},
   isLoading: false,
   errors: {},
   isAuthenticated: isAuthenticatedDefault,
@@ -149,13 +150,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const username: string = formData["username"];
       const password: string = formData["password"];
       const request_data = { email, username, password };
-      const result = await unauthenticatedClient.post("/auth/signup", request_data);
-      /*const newAccessToken = result.data.access_token;
-
-      setAccessToken(newAccessToken);
-
-      toast.success("Signup successful!");
-      navigate('/workouts');*/
+      await unauthenticatedClient.post("/auth/signup", request_data);
     } catch (error: any) {
       console.error("Signup error:", error);
       toast.error(error.response?.data?.detail || "Signup failed");
