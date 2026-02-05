@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import status, APIRouter, Depends, Request, Response
 import lib.database_lib.user_methods as user_methods
 import lib.database_lib.models as models
@@ -71,7 +71,7 @@ async def VerifyUser(request: Request, auth_request_user: models.AuthRequestUser
     if pending_user.get("verification_token") != auth_request_user.verification_token:
         raise APIError.unauthorized("Invalid verification token")
     
-    if pending_user.get("expires_at") < datetime.datetime.now(datetime.timezone.utc):
+    if pending_user.get("expires_at") < datetime.now(timezone.utc):
         user_methods.DeletePendingUserByEmail(auth_request_user.email)
         raise APIError.unauthorized("Verification token expired")
     
