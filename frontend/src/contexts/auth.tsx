@@ -14,6 +14,7 @@ interface AuthContextType {
   isLoading: boolean;
   signup: (formData: any) => Promise<void>;
   login: (formData: any) => Promise<void>;
+  authenticate: (token: string, email: string) => Promise<void>;
   logout: () => Promise<void>;
   errors: Record<string, string>;
   setErrors: (errors: Record<string, string>) => void;
@@ -119,6 +120,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const authenticate = async (token: string, email: string) => {
+    try {
+      const request_data = { token, email };
+      const response = await unauthenticatedClient.post("/auth/authenticate", request_data);
+
+      if (response.status === 200) {
+        toast.success("Email verified successfully! Redirecting to workouts...");
+        const newAccessToken = response.data.access_token;
+        setAccessToken(newAccessToken);
+        toast.success("Authentication successful!");
+        navigate('/workouts');
+      } else {
+        toast.error("Verification failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+      toast.error("Verification failed. Please try again.");
+    } 
+  };
+
   const signup = async (formData: any) => {
     if (!validateForm(formData)) return;
     setIsLoading(true);
@@ -165,6 +186,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         signup,
         login,
         logout,
+        authenticate,
         isLoading,
         setErrors,
         setIsLoading,
