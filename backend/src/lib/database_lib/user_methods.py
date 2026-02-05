@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 from .database_config import GetDb
-
-from .database_config import GetDb
 import pymongo
 
 def EnsureIndexes() -> None:
