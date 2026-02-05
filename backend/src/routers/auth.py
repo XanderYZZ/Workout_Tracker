@@ -67,7 +67,7 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
         token_type="bearer"
     )"""
 
-@router.get("/authenticate", models.TokenResponse, status_code=status.HTTP_200_OK)
+@router.get("/authenticate", response_model=models.TokenResponse, status_code=status.HTTP_200_OK)
 @limiter.limit("10/minute")
 async def VerifyUser(request: Request, auth_request_user: models.AuthRequestUser, response: Response):
     pending_user = user_methods.GetPendingUserByEmail(auth_request_user.email)
