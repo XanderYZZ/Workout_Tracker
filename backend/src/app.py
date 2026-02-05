@@ -3,8 +3,6 @@ import os
 import sys
 from pathlib import Path
 
-from lib.misc.error_handler import APIError
-
 sys.path.append(str(Path(__file__).resolve().parent))
 
 from fastapi import FastAPI, Request
@@ -15,6 +13,7 @@ from routers import auth, workouts, reports, settings
 from config import limiter
 from .lib.database_lib import workout_methods, user_methods
 from fastapi.responses import JSONResponse
+from .lib.misc.error_handler import APIError
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
