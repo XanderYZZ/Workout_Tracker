@@ -150,7 +150,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const username: string = formData["username"];
       const password: string = formData["password"];
       const request_data = { email, username, password };
-      await unauthenticatedClient.post("/auth/signup", request_data);
+      const response = await unauthenticatedClient.post("/auth/signup", request_data);
+
+      if (response && response.data?.message) {
+        Notifications.showSuccess(response.data?.message);
+      }
     } catch (error: any) {
       console.error("Signup error:", error);
       Notifications.showError(error);
