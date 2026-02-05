@@ -1,5 +1,5 @@
 from datetime import datetime
-from fastapi import HTTPException, status, APIRouter, Depends, Request, Response
+from fastapi import status, APIRouter, Depends, Request, Response
 import lib.database_lib.user_methods as user_methods
 import lib.database_lib.models as models
 import lib.database_lib.auth_helper as auth_helper

@@ -3,15 +3,18 @@ import os
 import sys
 from pathlib import Path
 
+from lib.misc.error_handler import APIError
+
 sys.path.append(str(Path(__file__).resolve().parent))
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
 from routers import auth, workouts, reports, settings
 from config import limiter
 from .lib.database_lib import workout_methods, user_methods
+from fastapi.responses import JSONResponse
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,6 +30,13 @@ async def rate_limit_handler(request, exc):
     return JSONResponse(
         status_code=429,
         content={"detail": "Too many requests. Please try again later."}
+    )
+
+@app.exception_handler(APIError)
+async def api_error_handler(request: Request, exc: APIError):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.message}
     )
 
 origins = [
