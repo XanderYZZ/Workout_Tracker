@@ -42,7 +42,6 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
         raise APIError.validation_error(ErrorMessage.PASSWORD_WEAK)
     
     emailable_result = emailable_client.verify(email=user.email)
-    emailable_result = emailable_result.json()
 
     if emailable_result.get('state') != 'deliverable':
         raise APIError.validation_error("Email could not be validated as existing.")
