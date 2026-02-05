@@ -21,7 +21,7 @@ function Layout() {
     <AuthProvider>
       <Outlet />
       <Toaster toastOptions={{
-          duration: 3500, 
+          duration: 4500, 
         }} />
     </AuthProvider>
   )
