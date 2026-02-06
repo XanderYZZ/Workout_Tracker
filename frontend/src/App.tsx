@@ -13,6 +13,7 @@ import Reports from './pages/Reports';
 import ErrorPage from './pages/ErrorPage';
 import Settings from './pages/Settings';
 import VerifyEmailPage from "./pages/VerifyEmailPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import CheckInboxPage from "./pages/CheckInboxPage";
 import ProtectedRoute from './lib/protected_route';
 import { SpeedInsights } from '@vercel/speed-insights/react';
@@ -46,6 +47,10 @@ function App() {
         {
           path: "/authenticate",
           element: <VerifyEmailPage />,
+        },
+        {
+          path: "/reset-password",
+          element: <ResetPasswordPage />
         },
         {
           path: "/check-inbox",

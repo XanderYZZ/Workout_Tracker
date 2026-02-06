@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Form } from "../components/form"
 import { useAuth } from '../lib/auth'
 import { PasswordInput, TextInput } from '../components/text_input';
+import { Link } from 'react-router-dom';
 
 const Login: FC = () => {
     const { login, isLoading, errors } = useAuth();
@@ -87,6 +88,15 @@ const Login: FC = () => {
                             'Sign in'
                         )}
                     </button>
+
+                    <div className="text-center mt-4">
+                        <p className="text-sm text-gray-200">
+                            Forgot your password?{' '}
+                            <Link to="/reset-password" className="font-medium text-blue-200 hover:text-indigo-500 transition-colors">
+                                Reset your password
+                            </Link>
+                        </p>
+                    </div>
                 </Form>
             </div>
         </div>

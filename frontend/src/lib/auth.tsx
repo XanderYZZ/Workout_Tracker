@@ -20,13 +20,41 @@ interface AuthContextType {
   setErrors: (errors: Record<string, string>) => void;
   setIsLoading: (loading: boolean) => void;
   isAuthenticated: () => boolean;
+  checkPasswordStrength: (password: string) => {
+    length: boolean;
+    uppercase: boolean;
+    lowercase: boolean;
+    digit: boolean;
+    special: boolean;
+  };
+  isPasswordStrong: (password: string) => boolean;
+  initialResetPasswordRequest: (email: string) => Promise<void>;
+  resetPassword: (token: string, password: string) => Promise<void>;
 }
+
+export const passwordStrengthKeys = {
+  length: false, uppercase: false, lowercase: false, digit: false, special: false
+};
 
 const isAuthenticatedDefault = () => {
   const accessToken = localStorage.getItem("access_token");
 
   return accessToken !== null;
 };
+
+const checkPasswordStrengthDefault = (password: string) => ({
+  length: password.length >= 8,
+  uppercase: /[A-Z]/.test(password),
+  lowercase: /[a-z]/.test(password),
+  digit: /\d/.test(password),
+  special: /[^a-zA-Z0-9]/.test(password)
+})
+
+const isPasswordStrongDefault = (password: string) => {
+  const requirements = checkPasswordStrengthDefault(password);
+
+  return Object.values(requirements).every(Boolean);
+}
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -37,9 +65,13 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => { },
   logout: async () => { },
   authenticate: async () => { },
+  resetPassword: async () => { },
+  initialResetPasswordRequest: async () => { },
   isLoading: false,
   errors: {},
   isAuthenticated: isAuthenticatedDefault,
+  checkPasswordStrength: checkPasswordStrengthDefault,
+  isPasswordStrong: isPasswordStrongDefault,
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -96,6 +128,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const checkPasswordStrength = checkPasswordStrengthDefault;
+  const isPasswordStrong = isPasswordStrongDefault;
+
   const login = async (formData: any) => {
     if (!validateForm(formData)) return;
     setIsLoading(true);
@@ -129,8 +164,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         Notifications.showSuccess("Email verified successfully! Redirecting to workouts...");
         const newAccessToken = response.data.access_token;
         setAccessToken(newAccessToken);
-        Notifications.showSuccess("Authentication successful!");
-        navigate('/workouts');
+        navigate('/workouts', { replace: true });
       } else {
         Notifications.showError("Verification failed. Please try again.");
       }
@@ -138,6 +172,37 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       Notifications.showError(error);
     }
   };
+
+  const initialResetPasswordRequest = async(email: string) => {
+    try {
+      const request_data = { email };
+      const response = await unauthenticatedClient.post("/auth/initial-reset-password", request_data);
+
+      if (response.status === 200) {
+        Notifications.showSuccess(response.data?.message);
+      } else {
+        Notifications.showError("The email sending failed. Please try again.");
+      }
+    } catch (error) {
+      Notifications.showError(error);
+    }
+  }
+
+  const resetPassword = async(token: string, password: string) => {
+    try {
+      const request_data = { token, password };
+      const response = await unauthenticatedClient.post("/auth/reset-password", request_data);
+
+      if (response.status === 200) {
+        Notifications.showSuccess(response.data?.message);
+        navigate('/workouts', { replace: true });
+      } else {
+        Notifications.showError("The email sending failed. Please try again.");
+      }
+    } catch (error) {
+      Notifications.showError(error);
+    }
+  }
 
   const signup = async (formData: any) => {
     if (!validateForm(formData)) return;
@@ -191,6 +256,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading,
         errors,
         isAuthenticated,
+        resetPassword,
+        initialResetPasswordRequest,
+        isPasswordStrong,
+        checkPasswordStrength,
       }}
     >
       {children}

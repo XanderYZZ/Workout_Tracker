@@ -2,35 +2,19 @@ import type { FC } from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Form } from "../components/form"
-import { useAuth } from '../lib/auth';
+import { useAuth, passwordStrengthKeys } from '../lib/auth';
 import { TextInput, PasswordInput } from '../components/text_input';
-
-const checkPasswordStrength = (password: string) => ({
-    length: password.length >= 8,
-    uppercase: /[A-Z]/.test(password),
-    lowercase: /[a-z]/.test(password),
-    digit: /\d/.test(password),
-    special: /[^a-zA-Z0-9]/.test(password)
-});
-
-const isPasswordStrong = (password: string) =>
-    Object.values(checkPasswordStrength(password)).every(Boolean);
+import { Notifications } from "../lib/notifications"
 
 const Signup: FC = () => {
-    const { signup, isLoading, errors, setErrors, setIsLoading } = useAuth();
+    const { signup, isLoading, errors, setErrors, setIsLoading, checkPasswordStrength, isPasswordStrong } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         username: '',
         password: '',
         confirmPassword: ''
     });
-    const [passwordRequirements, setPasswordRequirements] = useState({
-        length: false,
-        uppercase: false,
-        lowercase: false,
-        digit: false,
-        special: false
-    });
+    const [passwordRequirements, setPasswordRequirements] = useState({...passwordStrengthKeys});
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -69,8 +53,7 @@ const Signup: FC = () => {
         try {
             signup(formData);
         } catch (err) {
-            console.error('Signup error:', err);
-            alert('An error occurred. Please try again.');
+            Notifications.showError('An error occurred. Please try again.');
         } finally {
             setIsLoading(false);
         }

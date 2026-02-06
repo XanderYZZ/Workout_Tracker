@@ -13,6 +13,7 @@ from routers import auth, workouts, reports, settings
 from config import limiter
 from .lib.database_lib import workout_methods, user_methods
 from fastapi.responses import JSONResponse
+import config 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -32,7 +33,7 @@ async def rate_limit_handler(request, exc):
 
 origins = [
     "http://localhost:5173",  # Dev frontend
-    os.getenv("FRONTEND_URL"),  # Prod frontend
+    config.FRONTEND_URL,  # Prod frontend
 ]
 
 app.add_middleware(

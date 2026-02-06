@@ -6,11 +6,11 @@ from lib.database_lib import models
 from lib.database_lib import auth_helper 
 from lib.database_lib import workout_methods 
 from datetime import datetime, timezone
+import config 
 from config import limiter
 from lib.misc.error_handler import APIError, ErrorMessage
 
 router = APIRouter(tags=["workouts"], prefix="/workouts")
-MAXIMUM_WORKOUTS_PER_DAY = int(os.getenv("MAXIMUM_WORKOUTS_PER_DAY", 5))
 
 # CREATE
 @router.post("/", response_model=models.WorkoutResponse, status_code=status.HTTP_201_CREATED)
@@ -34,9 +34,9 @@ async def CreateWorkout(
     # I added this for some prevention of spamming workouts on a certain date.
     num_on_date = workout_methods.GetNumberOfWorkoutsForUserOnDate(current_user.user_id, workout_dict["scheduled_date"])
     
-    if num_on_date >= MAXIMUM_WORKOUTS_PER_DAY:
+    if num_on_date >= config.MAXIMUM_WORKOUTS_PER_DAY:
         raise APIError.validation_error(
-            ErrorMessage.LIMIT_EXCEEDED.format(limit=f"Maximum of {MAXIMUM_WORKOUTS_PER_DAY} workouts per day")
+            ErrorMessage.LIMIT_EXCEEDED.format(limit=f"Maximum of {config.MAXIMUM_WORKOUTS_PER_DAY} workouts per day")
         )
 
     workout_id = workout_methods.CreateWorkout(workout_dict)

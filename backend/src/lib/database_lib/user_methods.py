@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 from .database_config import GetDb
 import pymongo
+import config 
 
 def EnsureIndexes() -> None:
     db = GetDb()
@@ -79,6 +80,15 @@ def IsUserInUsersCollection(users_collection, email: str | None = None, username
         
     return False
 
+def setResetPasswordToken(email: str, token: str) -> None:
+    users = GetDb()["users"]
+    user = users.find_one({"email": email})
+
+    if not user:
+        return None 
+
+    users.update_one({"email": email}, {"$set": {"reset_password_token": token}})
+
 def DoesPendingUserExist(email: str | None = None, username: str | None = None) -> bool:
     pending_users = GetDb()["pending_users"]
 
@@ -91,11 +101,21 @@ def DoesVerifiedUserExist(email: str | None = None, username: str | None = None)
 
 def GetPendingUserByEmail(email: str) -> Optional[Dict]:
     pending_users = GetDb()["pending_users"]
+
     return pending_users.find_one({"email": email})
 
 def DeletePendingUserByEmail(email: str) -> None:
     pending_users = GetDb()["pending_users"]
     pending_users.delete_one({"email": email})
+
+def setNewHashedPassword(email: str, hashed_password: str) -> None:
+    users = GetDb()["users"]
+    user = users.find_one({"email": email})
+
+    if not user:
+        return None
+    
+    users.update_one({"email": email}, {"$set": {"password": hashed_password}})
 
 def CreateUser(email: str, username: str, hashed_password: str, verification_token: str | None = None) -> str:
     if verification_token and DoesPendingUserExist(email, username):
@@ -109,7 +129,7 @@ def CreateUser(email: str, username: str, hashed_password: str, verification_tok
 
     if verification_token:
         data["verification_token"] = verification_token
-        data["expires_at"] = datetime.now(timezone.utc) + timedelta(hours=2)
+        data["expires_at"] = datetime.now(timezone.utc) + timedelta(minutes=config.LINK_EXPIRATION_MINUTES)
 
     result = collection.insert_one(data)
     

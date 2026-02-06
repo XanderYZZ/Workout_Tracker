@@ -8,7 +8,7 @@ import datetime
 import config
 import secrets
 import hashlib
-import os
+import config 
 import secrets
 import smtplib
 from email.mime.text import MIMEText
@@ -17,20 +17,10 @@ from email.mime.multipart import MIMEMultipart
 SECRET_KEY = config.SECRET_KEY
 ph = PasswordHasher()
 ALGORITHM = "HS256"
-ACCESS_TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_MINUTES"))
-REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS"))
-FRONTEND_URL = os.getenv("FRONTEND_URL")
-SENDER_EMAIL = os.getenv("SENDER_EMAIL")
-SENDER_EMAIL_PASSWORD = os.getenv("SENDER_EMAIL_PASSWORD")
 
-def sendVerificationEmail(email: str, username: str, hashed_password: str) -> bool:
-    token = secrets.token_urlsafe(32)
-    user_methods.CreateUser(email, username, hashed_password, token)
-    verification_link = f"{FRONTEND_URL}/authenticate?token={token}&email={email}"
-    subject = "Verify Your Account"
-    body = f"Please click the following link to verify your email and create your account: {verification_link}"
+def sendEmail(email: str, subject: str, body: str) -> bool:
     msg = MIMEMultipart()
-    msg['From'] = SENDER_EMAIL
+    msg['From'] = config.SENDER_EMAIL
     msg['To'] = email
     msg.attach(MIMEText(body, 'plain'))
     msg['Subject'] = subject
@@ -38,8 +28,8 @@ def sendVerificationEmail(email: str, username: str, hashed_password: str) -> bo
     try:
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
-            server.login(SENDER_EMAIL, SENDER_EMAIL_PASSWORD)
-            server.sendmail(SENDER_EMAIL, email, msg.as_string())
+            server.login(config.SENDER_EMAIL, config.SENDER_EMAIL_PASSWORD)
+            server.sendmail(config.SENDER_EMAIL, email, msg.as_string())
         
             return True
     except Exception as e:
@@ -48,6 +38,29 @@ def sendVerificationEmail(email: str, username: str, hashed_password: str) -> bo
         user_methods.DeletePendingUserByEmail(email)
 
         return False
+
+def sendResetPasswordEmail(email: str) -> bool:
+    token = secrets.token_urlsafe(32)
+    user_methods.setResetPasswordToken(email, token)
+    reset_link = f"{config.FRONTEND_URL}/reset-password?token={token}&email={email}"
+    subject = "Reset Your Password"
+    body = f"""
+            Please click the following link to reset the password for your account: {reset_link}\n
+            It will expire in {config.LINK_EXPIRATION_MINUTES} minutes from the time this email was sent.
+            """
+    return sendEmail(email, subject, body)
+
+def sendVerificationEmail(email: str, username: str, hashed_password: str) -> bool:
+    token = secrets.token_urlsafe(32)
+    # The token argument ensures that the user is not verified.
+    user_methods.CreateUser(email, username, hashed_password, token)
+    verification_link = f"{config.FRONTEND_URL}/authenticate?token={token}&email={email}"
+    subject = "Verify Your Account"
+    body = f"""
+            Please click the following link to verify your email and create your account: {verification_link}\n
+            It will expire in {config.LINK_EXPIRATION_MINUTES} minutes from the time this email was sent.
+            """
+    return sendEmail(email, subject, body)
 
 def IsPasswordStrong(password: str) -> bool:
     if len(password) < 8:
@@ -89,7 +102,7 @@ def CreateAccessToken(user_id: str, email: str, username: str) -> str:
         "email": email,       
         "username": username,
         "iat": datetime.datetime.now(datetime.timezone.utc),
-        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=ACCESS_TOKEN_MINUTES)
+        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=config.ACCESS_TOKEN_MINUTES)
     }
 
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
@@ -98,7 +111,7 @@ def CreateTokenPair(user_id: str, email: str, username: str, device_fingerprint:
     access_token = CreateAccessToken(user_id, email, username)
     raw_refresh_token, refresh_token_hash = CreateRefreshToken()
     
-    expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=REFRESH_TOKEN_DAYS)
+    expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=config.REFRESH_TOKEN_DAYS)
     user_methods.StoreRefreshToken(
         user_id, 
         refresh_token_hash, 

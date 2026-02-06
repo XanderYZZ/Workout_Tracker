@@ -7,11 +7,8 @@ const CheckInboxPage = () => {
     const { user, accessToken } = useAuth();
 
     useEffect(() => {
-        console.log(user);
-        console.log(accessToken);
-        
         if (user || accessToken) {
-            navigate('/workouts');
+            navigate('/workouts', { replace: true });
         }
     }, [user, accessToken, navigate]);
 
@@ -20,7 +17,7 @@ const CheckInboxPage = () => {
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
                     <h2 className="text-3xl font-bold text-white-900 mb-2">Check your email inbox</h2>
-                    <p className="text-white-800">A verfication code has been sent to your email!</p>
+                    <p className="text-white-800">A link has been sent to your email inbox</p>
                 </div>
             </div>
         </div>

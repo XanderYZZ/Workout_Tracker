@@ -88,6 +88,14 @@ class OneRepMaxReport(BaseModel):
     per_day: Optional[dict[AwareDatetime, float]] = None
     exercise: str 
 
-class AuthRequestUser(BaseModel):
+class EmailVerificationModel(BaseModel):
     email: EmailStr 
     verification_token: str
+
+class InitialResetPasswordModel(BaseModel):
+    email: EmailStr
+
+class ResetPasswordModel(BaseModel):
+    email: EmailStr
+    token: str
+    password: str
