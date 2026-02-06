@@ -156,6 +156,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (response && response.data?.message) {
         Notifications.showSuccess(response.data?.message);
+        // Redirect to a new page.
+        navigate('/check-inbox');
       }
     } catch (error: any) {
       console.error("Signup error:", error);
