@@ -193,6 +193,9 @@ def GetUserHashedPasswordInDB(email: str) -> str:
 def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str, username: str, device_fingerprint: Optional[str] = None, parent_token_id: Optional[str] = None) -> str:
     refresh_tokens = GetDb()["refresh_tokens"]
 
+    # This is just to ensure that no user has multiple refresh tokens at a given time.
+    refresh_tokens.delete_many({"user_id": user_id, "email": email})
+
     result = refresh_tokens.insert_one({
         "user_id": user_id,
         "email": email,
