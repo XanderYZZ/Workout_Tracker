@@ -11,7 +11,7 @@ const ResetPasswordPage = () => {
     const navigate = useNavigate();
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
     const [ isInEmailState, setIsInEmailState ] = useState<boolean>(false);
-    const { resetPassword, errors, setErrors, checkPasswordStrength, initialResetPasswordRequest } = useAuth();
+    const { validatePasswordInputs, resetPassword, errors, setErrors, checkPasswordStrength, initialResetPasswordRequest, isEmailInValidForm } = useAuth();
     const [ token, setToken ] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         email: '',
@@ -42,8 +42,25 @@ const ResetPasswordPage = () => {
         if (errors[name]) setErrors({ ...errors, [name]: '' });
     };
 
+    const validateForm = () => {
+        const newErrors: { [key: string]: string } = {};
+
+        if (isInEmailState) {
+            if (!formData.email.trim()) newErrors.email = 'Email is required';
+            else if (!isEmailInValidForm(formData.email))
+                newErrors.email = 'Please enter a valid email address';
+        } else {
+            validatePasswordInputs(formData, newErrors);
+        }
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!validateForm()) return;
         setIsLoading(true);
 
         try {

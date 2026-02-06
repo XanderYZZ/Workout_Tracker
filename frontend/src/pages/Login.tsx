@@ -6,7 +6,7 @@ import { PasswordInput, TextInput } from '../components/text_input';
 import { Link } from 'react-router-dom';
 
 const Login: FC = () => {
-    const { login, isLoading, errors } = useAuth();
+    const { login, isLoading, errors, isPasswordStrong, setErrors } = useAuth();
 
     const [formData, setFormData] = useState({
         email_or_username: '',
@@ -21,8 +21,24 @@ const Login: FC = () => {
         }));
     };
 
+    const validateForm = () => {
+        const newErrors: { [key: string]: string } = {};
+
+        if (!formData.email_or_username.trim()) newErrors.email_or_username = 'Email or username is required';
+
+        if (!formData.password) newErrors.password = 'Password is required';
+        else if (!isPasswordStrong(formData.password))
+            newErrors.password = 'Password does not meet strength requirements';
+
+        setErrors(newErrors);
+        
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = (e: any) => {
         e.preventDefault();
+        if (!validateForm()) return; 
+
         login(formData);
     }
 

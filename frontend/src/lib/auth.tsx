@@ -30,6 +30,8 @@ interface AuthContextType {
   isPasswordStrong: (password: string) => boolean;
   initialResetPasswordRequest: (email: string) => Promise<void>;
   resetPassword: (email: string, token: string, password: string) => Promise<void>;
+  isEmailInValidForm: (email: string) => boolean;
+  validatePasswordInputs: (formData: any, newErrors: Record<string, string>) => void;
 }
 
 export const passwordStrengthKeys = {
@@ -56,6 +58,10 @@ const isPasswordStrongDefault = (password: string) => {
   return Object.values(requirements).every(Boolean);
 }
 
+const isEmailInValidFormDefault = (email: string) => {
+  return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
 const AuthContext = createContext<AuthContextType>({
   user: null,
   accessToken: null,
@@ -72,6 +78,8 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: isAuthenticatedDefault,
   checkPasswordStrength: checkPasswordStrengthDefault,
   isPasswordStrong: isPasswordStrongDefault,
+  isEmailInValidForm: isEmailInValidFormDefault,
+  validatePasswordInputs: (formData: any, newErrors: Record<string, string>) => { },
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -82,12 +90,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const isAuthenticated = isAuthenticatedDefault;
+  const checkPasswordStrength = checkPasswordStrengthDefault;
+  const isPasswordStrong = isPasswordStrongDefault;
+  const isEmailInValidForm = isEmailInValidFormDefault;
+
   // Reset errors each time the current page changes.
   useEffect(() => {
     setErrors({});
   }, [location.pathname]);
-
-  const isAuthenticated = () => isAuthenticatedDefault();
 
   const parseJwt = (token: string): any => {
     try {
@@ -128,8 +139,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const checkPasswordStrength = checkPasswordStrengthDefault;
-  const isPasswordStrong = isPasswordStrongDefault;
+  const validatePasswordInputs = (formData: any, newErrors: Record<string, string>) => {
+    if (!formData.password) newErrors.password = 'Password is required';
+      else if (!isPasswordStrong(formData.password))
+          newErrors.password = 'Password does not meet strength requirements';
+
+      if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
+      else if (formData.password !== formData.confirmPassword)
+          newErrors.confirmPassword = 'Passwords do not match';
+  }
 
   const login = async (formData: any) => {
     if (!validateForm(formData)) return;
@@ -260,6 +278,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         initialResetPasswordRequest,
         isPasswordStrong,
         checkPasswordStrength,
+        isEmailInValidForm,
+        validatePasswordInputs,
       }}
     >
       {children}

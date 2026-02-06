@@ -7,7 +7,7 @@ import { TextInput, PasswordInput } from '../components/text_input';
 import { Notifications } from "../lib/notifications"
 
 const Signup: FC = () => {
-    const { signup, isLoading, errors, setErrors, setIsLoading, checkPasswordStrength, isPasswordStrong } = useAuth();
+    const { validatePasswordInputs, signup, isLoading, errors, setErrors, setIsLoading, checkPasswordStrength, isEmailInValidForm } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         username: '',
@@ -28,20 +28,14 @@ const Signup: FC = () => {
         const newErrors: { [key: string]: string } = {};
 
         if (!formData.email.trim()) newErrors.email = 'Email is required';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+        else if (!isEmailInValidForm(formData.email))
             newErrors.email = 'Please enter a valid email address';
 
         if (!formData.username) newErrors.username = 'Username is required';
 
-        if (!formData.password) newErrors.password = 'Password is required';
-        else if (!isPasswordStrong(formData.password))
-            newErrors.password = 'Password does not meet strength requirements';
-
-        if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
-        else if (formData.password !== formData.confirmPassword)
-            newErrors.confirmPassword = 'Passwords do not match';
-
+        validatePasswordInputs(formData, newErrors);
         setErrors(newErrors);
+
         return Object.keys(newErrors).length === 0;
     };
 
