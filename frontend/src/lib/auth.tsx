@@ -29,7 +29,7 @@ interface AuthContextType {
   };
   isPasswordStrong: (password: string) => boolean;
   initialResetPasswordRequest: (email: string) => Promise<void>;
-  resetPassword: (token: string, password: string) => Promise<void>;
+  resetPassword: (email: string, token: string, password: string) => Promise<void>;
 }
 
 export const passwordStrengthKeys = {
@@ -188,9 +188,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }
 
-  const resetPassword = async(token: string, password: string) => {
+  const resetPassword = async(email: string, token: string, password: string) => {
     try {
-      const request_data = { token, password };
+      const request_data = { email, token, password };
       const response = await unauthenticatedClient.post("/auth/reset-password", request_data);
 
       if (response.status === 200) {

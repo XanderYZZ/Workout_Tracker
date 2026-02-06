@@ -50,7 +50,7 @@ const ResetPasswordPage = () => {
             if (isInEmailState || !token) {
                 initialResetPasswordRequest(formData.email);    
             } else {
-                resetPassword(token || "", formData.password);
+                resetPassword(formData.email, token || "", formData.password);
             }
         } catch (err) {
             Notifications.showError(err);

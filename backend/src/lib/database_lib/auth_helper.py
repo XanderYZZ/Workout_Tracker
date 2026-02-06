@@ -46,7 +46,7 @@ def sendResetPasswordEmail(email: str) -> bool:
     subject = "Reset Your Password"
     body = f"""
             Please click the following link to reset the password for your account: {reset_link}\n
-            It will expire in {config.LINK_EXPIRATION_MINUTES} minutes from the time this email was sent.
+            The token will expire in {config.LINK_EXPIRATION_MINUTES} minutes from the time this email was sent.
             """
     return sendEmail(email, subject, body)
 
@@ -58,7 +58,7 @@ def sendVerificationEmail(email: str, username: str, hashed_password: str) -> bo
     subject = "Verify Your Account"
     body = f"""
             Please click the following link to verify your email and create your account: {verification_link}\n
-            It will expire in {config.LINK_EXPIRATION_MINUTES} minutes from the time this email was sent.
+            The token will expire in {config.LINK_EXPIRATION_MINUTES} minutes from the time this email was sent.
             """
     return sendEmail(email, subject, body)
 
