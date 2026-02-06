@@ -27,9 +27,11 @@ const Signup: FC = () => {
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
 
-        if (!formData.email.trim()) newErrors.email = 'Email is required';
-        else if (!isEmailInValidForm(formData.email))
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!isEmailInValidForm(formData.email)) {
             newErrors.email = 'Please enter a valid email address';
+        }
 
         if (!formData.username) newErrors.username = 'Username is required';
 

@@ -59,7 +59,7 @@ const isPasswordStrongDefault = (password: string) => {
 }
 
 const isEmailInValidFormDefault = (email: string) => {
-  return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
 const validatePasswordInputsDefault = (formData: any, newErrors: Record<string, string>) => {
@@ -159,11 +159,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const password: string = formData["password"];
       const request_data = { email_or_username, password };
       const response = await unauthenticatedClient.post("/auth/login", request_data);
-      console.log(response);
       const newAccessToken = response.data.access_token;
-
       setAccessToken(newAccessToken);
-
       Notifications.showSuccess("Login successful!");
       navigate('/workouts');
     } catch (error: any) {

@@ -46,9 +46,11 @@ const ResetPasswordPage = () => {
         const newErrors: { [key: string]: string } = {};
 
         if (isInEmailState) {
-            if (!formData.email.trim()) newErrors.email = 'Email is required';
-            else if (!isEmailInValidForm(formData.email))
+            if (!formData.email.trim()) {
+                newErrors.email = 'Email is required';
+            } else if (!isEmailInValidForm(formData.email)) {
                 newErrors.email = 'Please enter a valid email address';
+            }
         } else {
             validatePasswordInputs(formData, newErrors);
         }
