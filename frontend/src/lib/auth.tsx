@@ -62,6 +62,16 @@ const isEmailInValidFormDefault = (email: string) => {
   return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
+const validatePasswordInputsDefault = (formData: any, newErrors: Record<string, string>) => {
+  if (!formData.password) newErrors.password = 'Password is required';
+    else if (!isPasswordStrongDefault(formData.password))
+        newErrors.password = 'Password does not meet strength requirements';
+
+    if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
+    else if (formData.password !== formData.confirmPassword)
+        newErrors.confirmPassword = 'Passwords do not match';
+}
+
 const AuthContext = createContext<AuthContextType>({
   user: null,
   accessToken: null,
@@ -79,7 +89,7 @@ const AuthContext = createContext<AuthContextType>({
   checkPasswordStrength: checkPasswordStrengthDefault,
   isPasswordStrong: isPasswordStrongDefault,
   isEmailInValidForm: isEmailInValidFormDefault,
-  validatePasswordInputs: (formData: any, newErrors: Record<string, string>) => { },
+  validatePasswordInputs: validatePasswordInputsDefault,
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -94,6 +104,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const checkPasswordStrength = checkPasswordStrengthDefault;
   const isPasswordStrong = isPasswordStrongDefault;
   const isEmailInValidForm = isEmailInValidFormDefault;
+  const validatePasswordInputs = validatePasswordInputsDefault;
 
   // Reset errors each time the current page changes.
   useEffect(() => {
@@ -138,16 +149,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     return Object.keys(newErrors).length === 0;
   };
-
-  const validatePasswordInputs = (formData: any, newErrors: Record<string, string>) => {
-    if (!formData.password) newErrors.password = 'Password is required';
-      else if (!isPasswordStrong(formData.password))
-          newErrors.password = 'Password does not meet strength requirements';
-
-      if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
-      else if (formData.password !== formData.confirmPassword)
-          newErrors.confirmPassword = 'Passwords do not match';
-  }
 
   const login = async (formData: any) => {
     if (Object.keys(errors).length > 0 || !validateForm(formData)) return;
