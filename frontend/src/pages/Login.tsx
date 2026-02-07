@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { useState } from "react";
 import { Form } from "../components/form"
-import { useAuth } from '../lib/auth'
+import { useAuth } from '../contexts/auth'
 import { PasswordInput, TextInput } from '../components/text_input';
 import { Link } from 'react-router-dom';
 

@@ -1,8 +1,8 @@
 import { createContext, useState, useEffect, useContext, type ReactNode } from "react";
-import { Notifications } from "./notifications";
+import { Notifications } from "../lib/notifications";
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-import { apiClient, unauthenticatedClient } from "./apiclient";
+import { apiClient, unauthenticatedClient } from "../lib/apiclient";
 
 interface AuthProviderProps {
   children: ReactNode;

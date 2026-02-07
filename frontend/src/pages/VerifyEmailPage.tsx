@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../lib/auth";
+import { useAuth } from "../contexts/auth";
 
 const VerifyEmailPage = () => {
     const { authenticate } = useAuth();

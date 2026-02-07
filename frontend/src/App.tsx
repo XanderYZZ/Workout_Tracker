@@ -4,7 +4,8 @@ import {
   Outlet,
 } from "react-router-dom";
 import { Toaster } from 'react-hot-toast'
-import { AuthProvider } from './lib/auth'
+import { AuthProvider } from './contexts/auth'
+import { WorkoutsProvider } from './contexts/workouts';
 import Home from './pages/Home';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -22,10 +23,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 function Layout() {
   return (
     <AuthProvider>
-      <Outlet />
-      <Toaster toastOptions={{
-          duration: 4500, 
-        }} />
+      <WorkoutsProvider>
+        <Outlet />
+        <Toaster toastOptions={{
+            duration: 4500, 
+          }} />
+      </WorkoutsProvider>
     </AuthProvider>
   )
 }

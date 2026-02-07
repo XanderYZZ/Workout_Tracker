@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Form } from "../components/form"
-import { useAuth, passwordStrengthKeys } from '../lib/auth';
+import { useAuth, passwordStrengthKeys } from '../contexts/auth';
 import { TextInput, PasswordInput } from '../components/text_input';
 import { Notifications } from "../lib/notifications"
 

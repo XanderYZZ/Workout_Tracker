@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Form } from "../components/form"
 import { TextInput } from "../components/text_input"
-import { useAuth, passwordStrengthKeys } from "../lib/auth"
+import { useAuth, passwordStrengthKeys } from "../contexts/auth"
 import { Notifications } from "../lib/notifications"
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { PasswordInput } from "../components/text_input"

@@ -8,7 +8,8 @@ import { CalendarPicker } from '../components/calendar_picker';
 import { DatesLibrary } from '../lib/dates';
 import { Notifications } from '../lib/notifications';
 import { ListedWorkout } from '../components/listed_workout';
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useWorkouts } from '../contexts/workouts';
 
 interface WorkoutFormData {
   name: string;
@@ -24,24 +25,13 @@ const Workouts: FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showCalendarPicker, setShowCalendarPicker] = useState(false);
 
+  const workouts = useWorkouts();
+
   const [formData, setFormData] = useState<WorkoutFormData>({
     name: '',
     scheduled_date: new Date().toISOString().slice(0, 16),
     exercises: [],
     comments: ''
-  });
-
-  const fetchWorkouts = async () => {
-    const res = await apiClient.get("/workouts/");
-    return res.data;
-  };
-
-  const {
-    data: workouts = [],
-    isLoading,
-  } = useQuery({
-    queryKey: ["workouts"],
-    queryFn: fetchWorkouts,
   });
 
   const queryClient = useQueryClient();
@@ -206,7 +196,7 @@ const Workouts: FC = () => {
     );
   }
 
-  if (isLoading && workouts.length === 0) {
+  if (!workouts) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-gray-600">Loading workouts...</div>
