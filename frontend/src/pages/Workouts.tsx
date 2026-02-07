@@ -40,7 +40,6 @@ const Workouts: FC = () => {
   const {
     data: workouts = [],
     isLoading,
-    error,
   } = useQuery({
     queryKey: ["workouts"],
     queryFn: fetchWorkouts,
@@ -78,7 +77,7 @@ const Workouts: FC = () => {
           return workout;
         });
       });
-      
+
       resetForm();
       setEditingId(null);
       Notifications.showSuccess("Workout updated successfully!");
