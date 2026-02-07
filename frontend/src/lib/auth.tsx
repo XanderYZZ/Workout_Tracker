@@ -34,63 +34,11 @@ interface AuthContextType {
   validatePasswordInputs: (formData: any, newErrors: Record<string, string>) => void;
 }
 
+const AuthContext = createContext<AuthContextType | null>(null);
+
 export const passwordStrengthKeys = {
   length: false, uppercase: false, lowercase: false, digit: false, special: false
 };
-
-const isAuthenticatedDefault = () => {
-  const accessToken = localStorage.getItem("access_token");
-
-  return accessToken !== null;
-};
-
-const checkPasswordStrengthDefault = (password: string) => ({
-  length: password.length >= 8,
-  uppercase: /[A-Z]/.test(password),
-  lowercase: /[a-z]/.test(password),
-  digit: /\d/.test(password),
-  special: /[^a-zA-Z0-9]/.test(password)
-})
-
-const isPasswordStrongDefault = (password: string) => {
-  const requirements = checkPasswordStrengthDefault(password);
-
-  return Object.values(requirements).every(Boolean);
-}
-
-const isEmailInValidFormDefault = (email: string) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-}
-
-const validatePasswordInputsDefault = (formData: any, newErrors: Record<string, string>) => {
-  if (!formData.password) newErrors.password = 'Password is required';
-    else if (!isPasswordStrongDefault(formData.password))
-        newErrors.password = 'Password does not meet strength requirements';
-
-    if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
-    else if (formData.password !== formData.confirmPassword)
-        newErrors.confirmPassword = 'Passwords do not match';
-}
-
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  accessToken: null,
-  setIsLoading: () => { },
-  setErrors: () => { },
-  signup: async () => { },
-  login: async () => { },
-  logout: async () => { },
-  authenticate: async () => { },
-  resetPassword: async () => { },
-  initialResetPasswordRequest: async () => { },
-  isLoading: false,
-  errors: {},
-  isAuthenticated: isAuthenticatedDefault,
-  checkPasswordStrength: checkPasswordStrengthDefault,
-  isPasswordStrong: isPasswordStrongDefault,
-  isEmailInValidForm: isEmailInValidFormDefault,
-  validatePasswordInputs: validatePasswordInputsDefault,
-});
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
@@ -100,11 +48,35 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isAuthenticated = isAuthenticatedDefault;
-  const checkPasswordStrength = checkPasswordStrengthDefault;
-  const isPasswordStrong = isPasswordStrongDefault;
-  const isEmailInValidForm = isEmailInValidFormDefault;
-  const validatePasswordInputs = validatePasswordInputsDefault;
+  const isAuthenticated = () => Boolean(accessToken);
+
+  const checkPasswordStrength = (password: string) => ({
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    digit: /\d/.test(password),
+    special: /[^a-zA-Z0-9]/.test(password)
+  });
+
+  const isPasswordStrong = (password: string) => {
+    const requirements = checkPasswordStrength(password);
+
+    return Object.values(requirements).every(Boolean);
+  };
+
+  const isEmailInValidForm = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  }
+
+  const validatePasswordInputs = (formData: any, newErrors: Record<string, string>) => {
+    if (!formData.password) newErrors.password = 'Password is required';
+    else if (!isPasswordStrong(formData.password))
+        newErrors.password = 'Password does not meet strength requirements';
+
+    if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
+    else if (formData.password !== formData.confirmPassword)
+        newErrors.confirmPassword = 'Passwords do not match';
+  }
 
   // Reset errors each time the current page changes.
   useEffect(() => {
@@ -287,4 +259,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return ctx;
+};

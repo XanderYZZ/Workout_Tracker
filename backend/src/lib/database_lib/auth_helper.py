@@ -18,7 +18,7 @@ SECRET_KEY = config.SECRET_KEY
 ph = PasswordHasher()
 ALGORITHM = "HS256"
 
-def sendEmail(email: str, subject: str, body: str) -> bool:
+def SendEmail(email: str, subject: str, body: str) -> bool:
     msg = MIMEMultipart()
     msg['From'] = config.SENDER_EMAIL
     msg['To'] = email
@@ -39,18 +39,18 @@ def sendEmail(email: str, subject: str, body: str) -> bool:
 
         return False
 
-def sendResetPasswordEmail(email: str) -> bool:
+def SendResetPasswordEmail(email: str) -> bool:
     token = secrets.token_urlsafe(32)
-    user_methods.setResetPasswordToken(email, token)
+    user_methods.SetResetPasswordToken(email, token)
     reset_link = f"{config.FRONTEND_URL}/reset-password?token={token}&email={email}"
     subject = "Reset Your Password"
     body = f"""
             Please click the following link to reset the password for your account: {reset_link}\n
             The token will expire in {config.LINK_EXPIRATION_MINUTES} minutes from the time this email was sent.
             """
-    return sendEmail(email, subject, body)
+    return SendEmail(email, subject, body)
 
-def sendVerificationEmail(email: str, username: str, hashed_password: str) -> bool:
+def SendVerificationEmail(email: str, username: str, hashed_password: str) -> bool:
     token = secrets.token_urlsafe(32)
     # The token argument ensures that the user is not verified.
     user_methods.CreateUser(email, username, hashed_password, token)
@@ -60,7 +60,7 @@ def sendVerificationEmail(email: str, username: str, hashed_password: str) -> bo
             Please click the following link to verify your email and create your account: {verification_link}\n
             The token will expire in {config.LINK_EXPIRATION_MINUTES} minutes from the time this email was sent.
             """
-    return sendEmail(email, subject, body)
+    return SendEmail(email, subject, body)
 
 def IsPasswordStrong(password: str) -> bool:
     if len(password) < 8:

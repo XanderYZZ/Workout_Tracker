@@ -4,81 +4,78 @@ from .database_config import GetDb
 import pymongo
 import config 
 
+INDEX_DEFINITIONS = {
+    "users": [
+        (
+            [("email", pymongo.ASCENDING)],
+            {"unique": True, "name": "users_email_unique"}
+        ),
+        (
+            [("username", pymongo.ASCENDING)],
+            {"unique": True, "name": "users_username_unique"}
+        ),
+    ],
+    "pending_users": [
+        (
+            [("email", pymongo.ASCENDING)],
+            {"unique": True, "name": "pending_users_email_unique"}
+        ),
+        (
+            [("username", pymongo.ASCENDING)],
+            {"unique": True, "name": "pending_users_username_unique"}
+        ),
+        (
+            [("verification_token", pymongo.ASCENDING)],
+            {"unique": True, "name": "pending_users_verification_token_unique"}
+        ),
+        (
+            [("expires_at", pymongo.ASCENDING)],
+            {"expireAfterSeconds": 0, "name": "pending_users_expiration_ttl"}
+        ),
+    ],
+    "refresh_tokens": [
+        (
+            [("token_hash", pymongo.ASCENDING)],
+            {"unique": True, "name": "refresh_tokens_token_hash_unique"}
+        ),
+        (
+            [("user_id", pymongo.ASCENDING)],
+            {"name": "refresh_tokens_user_id"}
+        ),
+        (
+            [("expires_at", pymongo.ASCENDING)],
+            {"expireAfterSeconds": 0, "name": "refresh_tokens_expiration_ttl"}
+        ),
+    ],
+}
+
 def EnsureIndexes() -> None:
     db = GetDb()
 
-    users = db["users"]
-    pending_users = db["pending_users"]
-    refresh_tokens = db["refresh_tokens"]
+    for collection_name, indexes in INDEX_DEFINITIONS.items():
+        collection = db[collection_name]
 
-    # USERS
-    users.create_index(
-        [("email", pymongo.ASCENDING)],
-        unique=True,
-        name="users_email_unique"
-    )
-
-    users.create_index(
-        [("username", pymongo.ASCENDING)],
-        unique=True,
-        name="users_username_unique"
-    )
-
-    # PENDING USERS
-    pending_users.create_index(
-        [("email", pymongo.ASCENDING)],
-        unique=True,
-        name="pending_users_email_unique"
-    )
-
-    pending_users.create_index(
-        [("username", pymongo.ASCENDING)],
-        unique=True,
-        name="pending_users_username_unique"
-    )
-
-    pending_users.create_index(
-        [("verification_token", pymongo.ASCENDING)],
-        unique=True,
-        name="pending_users_verification_token_unique"
-    )
-
-    pending_users.create_index(
-        [("expires_at", pymongo.ASCENDING)],
-        expireAfterSeconds=0,
-        name="pending_users_expiration_ttl"
-    )
-
-    # REFRESH TOKENS
-    refresh_tokens.create_index(
-        [("token_hash", pymongo.ASCENDING)],
-        unique=True,
-        name="refresh_tokens_token_hash_unique"
-    )
-
-    refresh_tokens.create_index(
-        [("user_id", pymongo.ASCENDING)],
-        name="refresh_tokens_user_id"
-    )
-
-    refresh_tokens.create_index(
-        [("expires_at", pymongo.ASCENDING)],
-        expireAfterSeconds=0,
-        name="refresh_tokens_expiration_ttl"
-    )
+        for keys, options in indexes:
+            collection.create_index(keys, **options)
 
 # Both the email and the username must be unique at this point in time.
 # This might change in the future.
 def IsUserInUsersCollection(users_collection, email: str | None = None, username: str | None = None) -> bool:
-    if email:
-        if users_collection.find_one({"email": email}):
-            return True
+    """
+    IsUserInUsersCollection
+    
+    :param users_collection: users or pending_users
+    :param email: email for user (optional)
+    :type email: str | None
+    :param username: username for user (optional)
+    :type username: str | None
+    :return: returns if user exists in the users_collection 
+    :rtype: bool
+    """
+    if not email and not username:
+        raise ValueError("email or username must be provided to IsUserInUsersCollection!")
 
-    if username:
-        if users_collection.find_one({"username": username}):
-            return True
-        
-    return False
+    return users_collection.find_one({"email": email}) or users_collection.find_one({"username": username})
 
 def DoesPendingUserExist(email: str | None = None, username: str | None = None) -> bool:
     pending_users = GetDb()["pending_users"]
@@ -99,7 +96,7 @@ def DeletePendingUserByEmail(email: str) -> None:
     pending_users = GetDb()["pending_users"]
     pending_users.delete_one({"email": email})
 
-def setResetPasswordToken(email: str, token: str) -> None:
+def SetResetPasswordToken(email: str, token: str) -> None:
     users = GetDb()["users"]
     user = users.find_one({"email": email})
 
@@ -108,12 +105,12 @@ def setResetPasswordToken(email: str, token: str) -> None:
 
     users.update_one({"email": email}, {"$set": {"reset_password_token": token}})
 
-def resetPassword(email: str, hashed_password: str) -> None:
+def ResetPassword(email: str, hashed_password: str) -> None:
     users = GetDb()["users"]
     user = users.find_one({"email": email})
 
     if not user:
-        return None
+        raise ValueError(f"User does not exist for email ${email}!")
 
     users.update_one(
         {"email": email}, 
@@ -191,6 +188,27 @@ def GetUserHashedPasswordInDB(email: str) -> str:
     return user["password"]
 
 def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str, username: str, device_fingerprint: Optional[str] = None, parent_token_id: Optional[str] = None) -> str:
+    """
+    StoreRefreshToken
+    
+    :param user_id: user id
+    :type user_id: str
+    :param token_hash: token hash
+    :type token_hash: str
+    :param expires_at: time token expires
+    :type expires_at: datetime
+    :param email: user email
+    :type email: str
+    :param username: username
+    :type username: str
+    :param device_fingerprint: fingerprint of device
+    :type device_fingerprint: Optional[str]
+    :param parent_token_id: parent token id
+    :type parent_token_id: Optional[str]
+    :return: inserted id is returned
+    :rtype: str
+    """
+    
     refresh_tokens = GetDb()["refresh_tokens"]
 
     # This is just to ensure that no user has multiple refresh tokens at a given time.

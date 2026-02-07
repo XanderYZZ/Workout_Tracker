@@ -17,6 +17,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import CheckInboxPage from "./pages/CheckInboxPage";
 import ProtectedRoute from './lib/protected_route';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 function Layout() {
   return (
@@ -30,6 +31,8 @@ function Layout() {
 }
 
 function App() {
+  const queryClient = new QueryClient();
+
   const router = createBrowserRouter([
     {
       path: "/",
@@ -91,7 +94,9 @@ function App() {
 
   return (
     <>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
       <SpeedInsights />
     </>
   );

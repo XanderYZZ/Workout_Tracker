@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { apiClient } from "../lib/apiclient";
 import { Calendar, Plus, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -8,6 +8,8 @@ import { CalendarPicker } from '../components/calendar_picker';
 import { DatesLibrary } from '../lib/dates';
 import { Notifications } from '../lib/notifications';
 import { ListedWorkout } from '../components/listed_workout';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 interface WorkoutFormData {
   name: string;
@@ -17,8 +19,6 @@ interface WorkoutFormData {
 }
 
 const Workouts: FC = () => {
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -33,68 +33,73 @@ const Workouts: FC = () => {
   });
 
   const fetchWorkouts = async () => {
-    try {
-      setLoading(true);
-      const response = await apiClient.get(`/workouts/`);
-
-      if (response.status !== 200) {
-        Notifications.showError('Failed to fetch workouts');
-        return;
-      };
-
-      const data = response.data;
-      setWorkouts(data);
-    } finally {
-      setLoading(false);
-    }
+    const res = await apiClient.get("/workouts/");
+    return res.data;
   };
 
-  useEffect(() => {
-    fetchWorkouts();
-  }, []); // I only run this once upon the initial load.
+  const {
+    data: workouts = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["workouts"],
+    queryFn: fetchWorkouts,
+  });
 
-  const createWorkout = async () => {
-    try {
-      const response = await apiClient.post(`/workouts/`, {
-        name: formData.name,
-        scheduled_date: new Date(formData.scheduled_date).toISOString(),
-        exercises: formData.exercises,
-        comments: formData.comments
-      });
+  const queryClient = useQueryClient();
 
-      if (response.status !== 201) {
-        Notifications.showError("Failed to create workout");
-        return;
-      }
-
-      await fetchWorkouts();
+  const createWorkout = useMutation({
+    mutationFn: (data: WorkoutFormData) =>
+      apiClient.post("/workouts/", {
+        ...data,
+        scheduled_date: new Date(data.scheduled_date).toISOString(),
+      }).then(res => res.data),
+    onSuccess: (newWorkout) => {
+      queryClient.setQueryData<Workout[]>(["workouts"], (oldWorkouts = []) => [...oldWorkouts, newWorkout]);
       resetForm();
       setIsCreating(false);
-    } catch (err: any) {
-      Notifications.showError(err);
-    }
-  };
+      Notifications.showSuccess("Workout created successfully!");
+    },
+    onError: (err: any) => Notifications.showError(err),
+  });
 
-  const updateWorkout = async (workoutId: string) => {
-    try {
-      const response = await apiClient.put(`/workouts/${workoutId}`, {
-        name: formData.name,
-        scheduled_date: new Date(formData.scheduled_date).toISOString(),
-        exercises: formData.exercises,
-        comments: formData.comments
+  const updateWorkout = useMutation({
+    mutationFn: ({ workoutId, data }: { workoutId: string; data: WorkoutFormData }) =>
+      apiClient.put(`/workouts/${workoutId}`, {
+        ...data,
+        scheduled_date: new Date(data.scheduled_date).toISOString(),
+      }).then(res => res.data),
+    onSuccess: (updatedWorkout) => {
+      queryClient.setQueryData<Workout[]>(["workouts"], (oldWorkouts = []) => {
+        return oldWorkouts.map((workout) => {
+          if (workout.id === updatedWorkout.id) {
+            return updatedWorkout;
+          }
+          return workout;
+        });
       });
-
-      if (response.status !== 200) throw new Error('Failed to update workout');
-
-      await fetchWorkouts();
+      
       resetForm();
       setEditingId(null);
-    } catch (err: any) {
-      Notifications.showError(err);
-    }
-  };
+      Notifications.showSuccess("Workout updated successfully!");
+    },
+    onError: (err: any) => Notifications.showError(err),
+  });
+
+  const deleteWorkoutMutation = useMutation({
+    mutationFn: (workoutId: string) => apiClient.delete(`/workouts/${workoutId}`).then(res => res.data),
+    onSuccess: () => {
+      queryClient.setQueryData<Workout[]>(["workouts"], (oldWorkouts = []) =>
+        oldWorkouts.filter((workout) => workout.id !== editingId)
+      );
+      setEditingId(null);
+      Notifications.showSuccess("Workout deleted successfully!");
+    },
+    onError: (err: any) => Notifications.showError(err),
+  });
 
   const deleteWorkout = async (workoutId: string) => {
+    // Show the confirmation screen before deleting the workout.
     const result = await Swal.fire({
       title: "Are you sure you want to delete this workout?",
       text: "This cannot be undone.",
@@ -112,15 +117,7 @@ const Workouts: FC = () => {
       return;
     }
 
-    try {
-      const response = await apiClient.delete(`/workouts/${workoutId}`);
-
-      if (response.status !== 204) throw new Error('Failed to delete workout');
-
-      await fetchWorkouts();
-    } catch (err: any) {
-      Notifications.showError(err);
-    }
+    deleteWorkoutMutation.mutate(workoutId);
   };
 
   const resetForm = () => {
@@ -167,16 +164,17 @@ const Workouts: FC = () => {
     });
   };
 
-  const getWorkoutsForDate = (date: Date) => {
-    return workouts.filter((workout) => {
+  const getWorkoutsForDate = useMemo(() => {
+    return workouts.filter((workout: Workout) => {
       const workoutDate = new Date(workout.scheduled_date);
+
       return (
-        workoutDate.getFullYear() === date.getFullYear() &&
-        workoutDate.getMonth() === date.getMonth() &&
-        workoutDate.getDate() === date.getDate()
+        workoutDate.getFullYear() === selectedDate.getFullYear() &&
+        workoutDate.getMonth() === selectedDate.getMonth() &&
+        workoutDate.getDate() === selectedDate.getDate()
       );
     });
-  };
+  }, [workouts, selectedDate]);
 
   const changeDayOrMonth = (is_day: boolean, offset: number) => {
     const newDate = new Date(selectedDate);
@@ -210,7 +208,7 @@ const Workouts: FC = () => {
     );
   }
 
-  if (loading && workouts.length === 0) {
+  if (isLoading && workouts.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-gray-600">Loading workouts...</div>
@@ -404,7 +402,7 @@ const Workouts: FC = () => {
 
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
                 <button
-                  onClick={() => editingId ? updateWorkout(editingId) : createWorkout()}
+                  onClick={() => editingId ? updateWorkout.mutate({ workoutId: editingId, data: formData }) : createWorkout.mutate(formData)}
                   className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
                   <Check size={20} />
@@ -437,7 +435,7 @@ const Workouts: FC = () => {
                 <p className="text-sm sm:text-base text-gray-600 mb-4">Create a new workout or select a different date!</p>
               </div>
             ) : (
-              getWorkoutsForDate(selectedDate).map((workout) => (
+              getWorkoutsForDate(selectedDate).map((workout: Workout) => (
                 <ListedWorkout
                   key={workout.id}
                   workout={workout}
