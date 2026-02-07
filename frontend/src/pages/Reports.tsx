@@ -18,7 +18,7 @@ const Reports: FC = () => {
     const [reportType, setReportType] = useState<REPORT_TYPE_OPEN>("contains");
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [exercises, setExercises] = useState<string[]>([]);
-    const [selectedExercise, setSelectedExercise] = useState("");
+    const [selectedExerciseName, setSelectedExerciseName] = useState("");
     const [status, setStatus] = useState<STATUS_TYPE>("none");
     const [containsWorkouts, setContainsWorkouts] = useState<Workout[]>([]);
     const [startDate, setStartDate] = useState<Date>(new Date());
@@ -49,30 +49,21 @@ const Reports: FC = () => {
         setExercises(Array.from(exerciseSet));
     }
 
-    const fetchWorkoutsWithSelectedExercise = () => {
-        if (!selectedExercise) {
+    const fetchWorkoutsWithSelectedExerciseName = () => {
+        if (!selectedExerciseName) {
             setContainsWorkouts([]);
             setStatus("none");
             return;
         }
 
-        const newContains = workouts.filter((workout) => {
-            for (let exercise of workout.exercises) {
-                if (exercise.name == selectedExercise) {
-                    return true;
-                }
-            }
-
-            return false;
-        })
-
+        const newContains = workouts.filter((workout) => workout.exercises.some(exerciseObj => exerciseObj.name == selectedExerciseName));
         setContainsWorkouts(newContains);
         setStatus("success");
     }
 
     const handleToggle = (exercise: string) => {
-        const isDeselecting = selectedExercise === exercise;
-        setSelectedExercise(isDeselecting ? "" : exercise);
+        const isDeselecting = selectedExerciseName === exercise;
+        setSelectedExerciseName(isDeselecting ? "" : exercise);
         setDropdownVisible(false);
     };
 
@@ -85,11 +76,11 @@ const Reports: FC = () => {
     }, []);
 
     useEffect(() => {
-        fetchWorkoutsWithSelectedExercise();
-    }, [selectedExercise]);
+        fetchWorkoutsWithSelectedExerciseName();
+    }, [selectedExerciseName]);
 
     useEffect(() => {
-        setSelectedExercise("");
+        setSelectedExerciseName("");
         setContainsWorkouts([]);
         setStatus("none");
         setDropdownVisible(false);
@@ -144,23 +135,58 @@ const Reports: FC = () => {
         return (startDate && endDate) && (startDate <= endDate);
     };
 
+    const getWorkoutsInPeriod = () => {
+        const inPeriod: Workout[] = [];
+
+        for (let workout of workouts) {
+            const scheduledDate = new Date(workout.scheduled_date);
+
+            if (scheduledDate >= startDate && scheduledDate <= endDate) {
+                if (!selectedExerciseName) {
+                    inPeriod.push(workout);
+                } else {
+                    if (workout.exercises.some(exerciseObj => exerciseObj.name == selectedExerciseName)) {
+                        inPeriod.push(workout);
+                    }
+                }
+            }
+        }
+
+        return inPeriod;
+    }
+
     const generateVolumeOr1RMReport = (isVolume: boolean) => {
         if (!areDatesValid()) {
             Notifications.showError("Please select a start and end date!");
             return;
         }
 
-        if (!isVolume && (selectedExercise == null || selectedExercise == "")) {
+        if (!isVolume && (selectedExerciseName == null || selectedExerciseName == "")) {
             Notifications.showError("Please select an exercise for the 1RM report!");
             return;
         }
 
+        // I left off here, continue tomorrow to finish this up to remove the calls to the backend. 
+        // Ensure that dates are accounted for correctly, and that the general functioning of the reports is still correct after
+        // converting it all to the frontend only. 
+        const inPeriod = getWorkoutsInPeriod();
+        const perDay = {};
+        const total = 0; // For the volume reports.
+
+        for (let entry of inPeriod) {
+            console.log(entry);
+
+            if (isVolume) {
+                
+            }
+        }
+        
         const endpoint: string = isVolume ? "/reports/volume" : "/reports/onerepmax";
         apiClient.post(endpoint, {
             start_date: DatesLibrary.convertDateToYMD(startDate),
             end_date: DatesLibrary.convertDateToYMD(endDate),
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            exercise: selectedExercise || null,
+            exercise: selectedExerciseName || null,
         }).then(response => {
             if (isVolume) {
                 setVolumeReportTotal(response.data.total_volume);
@@ -238,7 +264,7 @@ const Reports: FC = () => {
             <ExerciseDropdown
                 toggleDropdown={toggleDropdown}
                 isVisible={dropdownVisible}
-                selectedExercise={selectedExercise}
+                selectedExerciseName={selectedExerciseName}
                 exercises={exercises}
                 handleToggle={handleToggle}
             />
@@ -278,7 +304,7 @@ const Reports: FC = () => {
                                 <ExerciseDropdown
                                     toggleDropdown={toggleDropdown}
                                     isVisible={dropdownVisible}
-                                    selectedExercise={selectedExercise}
+                                    selectedExerciseName={selectedExerciseName}
                                     exercises={exercises}
                                     handleToggle={handleToggle}
                                 />
@@ -303,7 +329,7 @@ const Reports: FC = () => {
                                                 Error fetching workouts.
                                             </p>
                                             <button
-                                                onClick={fetchWorkoutsWithSelectedExercise}
+                                                onClick={fetchWorkoutsWithSelectedExerciseName}
                                                 className="w-full rounded-lg bg-red-600 px-4 py-2 text-white"
                                             >
                                                 Retry
@@ -314,7 +340,7 @@ const Reports: FC = () => {
                                     {status === "success" && (
                                         <div className="space-y-4">
                                             <h2 className="text-xl font-semibold text-gray-900">
-                                                Workouts containing “{selectedExercise}”
+                                                Workouts containing “{selectedExerciseName}”
                                             </h2>
 
                                             <ul className="space-y-4">

@@ -3,7 +3,7 @@ import type { FC } from "react";
 interface ExerciseDropdownProps {
     toggleDropdown: () => void;
     isVisible: boolean;
-    selectedExercise: string | null;
+    selectedExerciseName: string | null;
     exercises: string[];
     handleToggle: (exercise: string) => void;
 }
@@ -11,7 +11,7 @@ interface ExerciseDropdownProps {
 export const ExerciseDropdown: FC<ExerciseDropdownProps> = ({
     toggleDropdown,
     isVisible,
-    selectedExercise,
+    selectedExerciseName,
     exercises,
     handleToggle
 }) => {
@@ -20,7 +20,7 @@ export const ExerciseDropdown: FC<ExerciseDropdownProps> = ({
             <button
                 onClick={() => handleToggle(exercise)}
                 className={`w-full px-4 py-2 text-left text-gray-900 hover:bg-gray-100 ${
-                    selectedExercise === exercise ? "bg-gray-200 font-semibold" : ""
+                    selectedExerciseName === exercise ? "bg-gray-200 font-semibold" : ""
                 }`}
             >
                 {exercise}
@@ -34,7 +34,7 @@ export const ExerciseDropdown: FC<ExerciseDropdownProps> = ({
                 onClick={toggleDropdown}
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-left text-gray-900 shadow-sm"
             >
-                {selectedExercise || "Select an Exercise"}
+                {selectedExerciseName || "Select an Exercise"}
                 <span className="float-right">{isVisible ? "▲" : "▼"}</span>
             </button>
 
