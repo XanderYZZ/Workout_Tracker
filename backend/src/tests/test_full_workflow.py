@@ -16,9 +16,11 @@ def test_full_workflow():
 
     email = "testingfull8@example.com"
     password = "Thetest123!"
+    username = "testingfull8"
 
     # Signup
-    response = client.post("/auth/signup", json={"email": email, "password": password})
+    # This should be changed to account for the new email verification requirement if I want to use it in the future.
+    response = client.post("/auth/signup", json={"email": email, "username": username, "password": password})
     access_token = ""
     if response.status_code == 201: 
         access_token = response.json()["access_token"]

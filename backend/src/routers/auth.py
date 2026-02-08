@@ -52,7 +52,7 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
         raise APIError.validation_error(ErrorMessage.PASSWORD_WEAK)
 
     hashed_password = auth_helper.GetPasswordHash(user.password)
-    success = auth_helper.SendVerificationEmail(user.email, user.username, hashed_password)
+    success = auth_helper.InitiateEmailVerification(user.email, user.username, hashed_password)
 
     if not success:
         raise APIError.server_error("Failed to send verification email. Please try again later.")
@@ -102,7 +102,7 @@ async def InitialResetPasswordRequest(request: Request, reset_password_model: mo
     if not verified_user:
         raise APIError.conflict("Could not find account for that email")
     
-    success = auth_helper.SendResetPasswordEmail(reset_password_model.email)
+    success = auth_helper.InitiateResetPassword(reset_password_model.email)
 
     if not success:
         raise APIError.server_error("Failed to send reset password email. Please try again later.")
