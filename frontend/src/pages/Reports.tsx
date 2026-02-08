@@ -1,7 +1,6 @@
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { isEqual } from "lodash";
-import { apiClient } from "../lib/apiclient";
 import { Navbar } from "../components/navbar";
 import { ExerciseDropdown } from "../components/exercise_dropdown";
 import { ListedWorkout } from "../components/listed_workout";
