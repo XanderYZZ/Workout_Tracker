@@ -4,7 +4,6 @@ import lib.database_lib.settings_methods as settings_methods
 import lib.database_lib.models as models
 import lib.database_lib.auth_helper as auth_helper
 from config import limiter
-from lib.misc import dates
 from lib.misc.error_handler import APIError, ErrorMessage
 
 router = APIRouter(tags=["settings"], prefix="/settings")
