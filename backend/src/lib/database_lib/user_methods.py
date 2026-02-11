@@ -173,16 +173,10 @@ def UserHasResetPasswordToken(email: str) -> bool:
 
 def ResetPassword(user_id: ObjectId, hashed_password: str) -> None:
     users = GetDb()["users"]
-
-    result = users.update_one(
+    users.update_one(
         {"_id": user_id},
         {"$set": {"password": hashed_password}}
     )
-
-    if result.matched_count == 0:
-        raise ValueError("User not found")
-
-    # Revoke all refresh tokens
     RevokeAllUserRefreshTokens(user_id)
 
 def CreateUser(email: str, username: str, hashed_password: str, verification_token: str | None = None) -> str:
