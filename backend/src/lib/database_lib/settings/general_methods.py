@@ -1,4 +1,4 @@
-from .database_config import GetDb
+from ..database_config import GetDb
 
 def UpdateBodyweight(email: str, bodyweight: float = 0) -> bool:
     users = GetDb()["users"]

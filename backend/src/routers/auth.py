@@ -1,8 +1,10 @@
 from datetime import datetime, timezone
 from fastapi import status, APIRouter, Depends, Request, Response
-import lib.database_lib.user_methods as user_methods
+import lib.database_lib.users.general_methods as general_user_methods
+import lib.database_lib.users.reset_password as reset_password_methods
+import lib.database_lib.users.refresh_tokens as refresh_token_methods
 import lib.database_lib.models as models
-import lib.database_lib.auth_helper as auth_helper
+import lib.database_lib.users.auth_helper as auth_helper
 from config import limiter
 from lib.misc.error_handler import APIError, ErrorMessage
 import lib.database_lib.database_config as database_config
@@ -50,10 +52,10 @@ def CreateAccessToken(request: Request, response: Response, user_id: str, email:
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 @limiter.limit("3/minute")
 async def SignUp(request: Request, user: models.UserCreate, response: Response):
-    if user_methods.DoesPendingUserExist(user.email, user.username):
+    if general_user_methods.DoesPendingUserExist(user.email, user.username):
         raise APIError.conflict(ErrorMessage.PENDING_USER_ALREADY_EXISTS)
 
-    if user_methods.DoesVerifiedUserExist(user.email, user.username):
+    if general_user_methods.DoesVerifiedUserExist(user.email, user.username):
         raise APIError.conflict(ErrorMessage.VERIFIED_USER_ALREADY_EXISTS)
     
     if not auth_helper.IsPasswordStrong(user.password):
@@ -70,12 +72,12 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
 @router.post("/authenticate", response_model=models.TokenResponse, status_code=status.HTTP_200_OK)
 @limiter.limit("3/minute")
 async def VerifyUser(request: Request, email_verification_model: models.EmailVerificationModel, response: Response):
-    verified_user = user_methods.GetVerifiedUserByEmail(email_verification_model.email)
+    verified_user = general_user_methods.GetVerifiedUserByEmail(email_verification_model.email)
 
     if verified_user:
         raise APIError.conflict("User already verified")
 
-    pending_user = user_methods.GetPendingUserByEmail(email_verification_model.email)
+    pending_user = general_user_methods.GetPendingUserByEmail(email_verification_model.email)
     
     if not pending_user:
         raise APIError.not_found("Pending user not found")
@@ -86,16 +88,16 @@ async def VerifyUser(request: Request, email_verification_model: models.EmailVer
     pending_user = database_config.MakeDatetimeAware(pending_user)
 
     if pending_user.get("expires_at") < datetime.now(timezone.utc):
-        user_methods.DeletePendingUserByEmail(email_verification_model.email)
+        general_user_methods.DeletePendingUserByEmail(email_verification_model.email)
         raise APIError.unauthorized("Verification token expired")
     
-    user_id = user_methods.CreateUser(
+    user_id = general_user_methods.CreateUser(
         email=pending_user["email"],
         username=pending_user["username"],
         hashed_password=pending_user["password"]
     )
     
-    user_methods.DeletePendingUserByEmail(email_verification_model.email)
+    general_user_methods.DeletePendingUserByEmail(email_verification_model.email)
     
     return models.TokenResponse(
         access_token=CreateAccessToken(request, response, user_id, email_verification_model.email, pending_user["username"]),
@@ -105,12 +107,12 @@ async def VerifyUser(request: Request, email_verification_model: models.EmailVer
 @router.post("/initial-reset-password", status_code=status.HTTP_200_OK)
 @limiter.limit("3/minute")
 async def InitialResetPasswordRequest(request: Request, reset_password_model: models.InitialResetPasswordModel, response: Response):
-    verified_user = user_methods.GetVerifiedUserByEmail(reset_password_model.email)
+    verified_user = general_user_methods.GetVerifiedUserByEmail(reset_password_model.email)
 
     if not verified_user:
         raise APIError.conflict("Could not find account for that email")
     
-    if user_methods.UserHasResetPasswordToken(reset_password_model.email):
+    if reset_password_methods.UserHasResetPasswordToken(reset_password_model.email):
         raise APIError.conflict("A reset password email has already been sent. Please check your email or try again later.")
 
     success = auth_helper.InitiateResetPassword(reset_password_model.email)
@@ -130,7 +132,7 @@ async def ResetPasswordRequest(
     if not auth_helper.IsPasswordStrong(reset_password_model.password):
         raise APIError.validation_error(ErrorMessage.PASSWORD_WEAK)
 
-    user_id = user_methods.ConsumePasswordResetToken(
+    user_id = reset_password_methods.ConsumePasswordResetToken(
         reset_password_model.token
     )
 
@@ -141,8 +143,8 @@ async def ResetPasswordRequest(
         reset_password_model.password
     )
 
-    user_methods.ResetPassword(user_id, hashed_password)
-    user = user_methods.GetVerifiedUserByEmail(reset_password_model.email)
+    reset_password_methods.ResetPassword(user_id, hashed_password)
+    user = general_user_methods.GetVerifiedUserByEmail(reset_password_model.email)
 
     return models.TokenResponse(
         access_token=CreateAccessToken(request, response, str(user_id), user["email"], user["username"]),
@@ -152,18 +154,18 @@ async def ResetPasswordRequest(
 @router.post("/login", response_model=models.TokenResponse, status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")
 async def Login(request: Request, user: models.UserLogin, response: Response):
-    email = user_methods.GetUserEmailByEmailOrUsername(user.email_or_username)
-    username = user_methods.GetUsernameByEmail(email)
+    email = general_user_methods.GetUserEmailByEmailOrUsername(user.email_or_username)
+    username = general_user_methods.GetUsernameByEmail(email)
 
-    if not user_methods.DoesVerifiedUserExist(email, username):
+    if not general_user_methods.DoesVerifiedUserExist(email, username):
         raise APIError.validation_error(ErrorMessage.INVALID_CREDENTIALS)
 
-    hashed_password = user_methods.GetUserHashedPasswordInDB(email)
+    hashed_password = general_user_methods.GetUserHashedPasswordInDB(email)
 
     if not auth_helper.VerifyPassword(user.password, hashed_password):
         raise APIError.unauthorized(ErrorMessage.INVALID_CREDENTIALS)
     
-    user_id = user_methods.GetUserIdByEmail(email)
+    user_id = general_user_methods.GetUserIdByEmail(email)
     
     return models.TokenResponse(
         access_token=CreateAccessToken(request, response, str(user_id), email, username),
@@ -196,7 +198,7 @@ async def Refresh(request: Request, response: Response):
 @router.post("/logout", status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")
 async def Logout(request: Request, response: Response, current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser)):
-    user_methods.RevokeAllUserRefreshTokens(current_user.user_id)
+    refresh_token_methods.RevokeAllUserRefreshTokens(current_user.user_id)
     ResponseDeleteCookieHelper(response)
 
     return {"message": "Logged out successfully"}

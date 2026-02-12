@@ -10,14 +10,13 @@ from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
 from routers import auth, workouts, settings
 from config import limiter
-from .lib.database_lib import workout_methods, user_methods
+from lib.database_lib import indexes
 from fastapi.responses import JSONResponse
 import config 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    workout_methods.EnsureIndexes()
-    user_methods.EnsureIndexes()
+    indexes.EnsureIndexes()
     yield    
 
 app = FastAPI(title="Workout Tracker", lifespan=lifespan)

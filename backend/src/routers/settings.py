@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status, Depends, Request
-import lib.database_lib.user_methods as user_methods
-import lib.database_lib.settings_methods as settings_methods
+import lib.database_lib.users.general_methods as general_user_methods
+import lib.database_lib.settings.general_methods as general_settings_methods
 import lib.database_lib.models as models
-import lib.database_lib.auth_helper as auth_helper
+import lib.database_lib.users.auth_helper as auth_helper
 from config import limiter
 from lib.misc.error_handler import APIError, ErrorMessage
 
@@ -15,7 +15,7 @@ async def GetAllSettings(
     request: Request,
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
-    user_record = user_methods.GetVerifiedUserByEmail(current_user.email)
+    user_record = general_user_methods.GetVerifiedUserByEmail(current_user.email)
 
     if not user_record:
         raise APIError.server_error(ErrorMessage.FAILED_TO_RETRIEVE)
@@ -32,7 +32,7 @@ async def UpdateBodyweight(
     payload: models.BodyweightUpdate,
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
-    result = settings_methods.UpdateBodyweight(current_user.email, payload.bodyweight)
+    result = general_settings_methods.UpdateBodyweight(current_user.email, payload.bodyweight)
 
     if not result:
         raise APIError.server_error(ErrorMessage.FAILED_TO_UPDATE)

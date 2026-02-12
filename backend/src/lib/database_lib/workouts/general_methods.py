@@ -1,15 +1,8 @@
 from datetime import datetime, timezone
 from bson import ObjectId
-import pymongo
 from pymongo.results import InsertOneResult
 from typing import Dict, List, Optional
-from .database_config import GetDb, MakeDatetimeAware
-
-def EnsureIndexes():
-    workouts = GetDb()["workouts"]
-    workouts.create_index([("user_id", 1), ("scheduled_date", -1)])
-    workouts.create_index([("user_id", 1), ("exercises.name", 1)])
-    workouts.create_index([("_id", 1), ("user_id", 1)])
+from ..database_config import GetDb, MakeDatetimeAware
 
 def UpdateWorkout(workout_id: str, user_id: str, update_data: Dict) -> bool:
     workouts = GetDb()["workouts"]
