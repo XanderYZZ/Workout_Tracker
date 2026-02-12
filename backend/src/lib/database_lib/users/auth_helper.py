@@ -9,31 +9,33 @@ import hashlib
 import config 
 import secrets
 from lib.misc import emails
+from . import refresh_tokens
+from . import general_methods as general_user_methods
 
 SECRET_KEY = config.SECRET_KEY
 ph = PasswordHasher()
 ALGORITHM = "HS256"
 
 def InitiateResetPassword(email: str) -> bool:
-    user = users.GetVerifiedUserByEmail(email)
+    user = general_user_methods.GetVerifiedUserByEmail(email)
 
     if not user:
         return False
 
     user_id = user["_id"] 
-    raw_token = users.StorePasswordResetToken(user_id)
+    raw_token = general_user_methods.StorePasswordResetToken(user_id)
 
     return emails.SendResetPasswordEmail(raw_token, email)
 
 def InitiateEmailVerification(email: str, username: str, hashed_password: str) -> bool:
     token = secrets.token_urlsafe(32)
     # The token argument ensures that the user is not verified.
-    users.CreateUser(email, username, hashed_password, token)
+    general_user_methods.CreateUser(email, username, hashed_password, token)
     success = emails.SendVerificationEmail(token, email, username, hashed_password)
 
     if not success:
         # The user is deleted so they can try again.
-        users.DeletePendingUserByEmail(email)
+        general_user_methods.DeletePendingUserByEmail(email)
 
     return success
 
@@ -85,7 +87,7 @@ def CreateTokenPair(user_id: str, email: str, username: str, device_fingerprint:
     raw_refresh_token, refresh_token_hash = CreateRefreshToken()
 
     expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=config.REFRESH_TOKEN_DAYS)
-    users.StoreRefreshToken(
+    refresh_tokens.StoreRefreshToken(
         user_id, 
         refresh_token_hash, 
         expires_at, 
@@ -98,7 +100,7 @@ def CreateTokenPair(user_id: str, email: str, username: str, device_fingerprint:
 
 def ValidateRefreshTokenAndGetUser(raw_refresh_token: str, device_fingerprint: str) -> dict:
     token_hash = hashlib.sha256(raw_refresh_token.encode()).hexdigest()
-    result = users.GetRefreshTokenInfo(token_hash)
+    result = refresh_tokens.GetRefreshTokenInfo(token_hash)
 
     if result is None:
         raise ValueError("Refresh token is invalid, expired, or revoked")
@@ -110,7 +112,7 @@ def ValidateRefreshTokenAndGetUser(raw_refresh_token: str, device_fingerprint: s
 
 def RefreshAccessToken(raw_refresh_token: str, device_fingerprint: str) -> tuple:
     token_hash = hashlib.sha256(raw_refresh_token.encode()).hexdigest()
-    token_info = users.ConsumeRefreshToken(token_hash)
+    token_info = refresh_tokens.ConsumeRefreshToken(token_hash)
 
     if not token_info:
         raise ValueError("Invalid or expired refresh token")
@@ -129,7 +131,8 @@ def RefreshAccessToken(raw_refresh_token: str, device_fingerprint: str) -> tuple
 
 def RevokeRefreshToken(raw_refresh_token: str) -> bool:
     token_hash = hashlib.sha256(raw_refresh_token.encode()).hexdigest()
-    return users.RevokeRefreshToken(token_hash)
+
+    return refresh_tokens.RevokeRefreshToken(token_hash)
 
 async def GetCurrentUser(authorization : str = Header(...)) -> models.CurrentUser:    
     if not authorization.startswith("Bearer "):
@@ -161,7 +164,7 @@ async def GetCurrentUser(authorization : str = Header(...)) -> models.CurrentUse
             detail="Invalid token"
         )
     
-    if not users.DoesVerifiedUserExist(email):
+    if not general_user_methods.DoesVerifiedUserExist(email):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Verified user does not exist"
