@@ -1,5 +1,8 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
-import { Notifications } from './notifications';
+import axios, {
+    type AxiosInstance,
+    type InternalAxiosRequestConfig,
+} from "axios";
+import { Notifications } from "./notifications";
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
@@ -19,7 +22,7 @@ let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
 
 function onRefreshed(token: string) {
-    refreshSubscribers.forEach(callback => callback(token));
+    refreshSubscribers.forEach((callback) => callback(token));
     refreshSubscribers = [];
 }
 
@@ -40,7 +43,9 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-        const originalRequest = error.config as InternalAxiosRequestConfig & { retry?: boolean };
+        const originalRequest = error.config as InternalAxiosRequestConfig & {
+            retry?: boolean;
+        };
         Notifications.showError(error);
 
         if (error.response?.status === 401 && !originalRequest.retry) {
@@ -60,7 +65,7 @@ apiClient.interceptors.response.use(
             try {
                 const refreshResponse = await unauthenticatedClient.post(
                     "/auth/refresh",
-                    {}
+                    {},
                 );
 
                 const { access_token } = refreshResponse.data;
@@ -83,5 +88,5 @@ apiClient.interceptors.response.use(
         }
 
         return Promise.reject(error);
-    }
+    },
 );

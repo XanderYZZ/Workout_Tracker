@@ -1,6 +1,6 @@
 import { toast } from "react-hot-toast";
 
-const DEFAULT_ERROR_MESSAGE = 'An error occurred';
+const DEFAULT_ERROR_MESSAGE = "An error occurred";
 
 export const Notifications = {
     showSuccess: (message: string) => {
@@ -11,13 +11,13 @@ export const Notifications = {
         const detail = error?.response?.data?.detail;
         let errorMessage = DEFAULT_ERROR_MESSAGE;
 
-        if (typeof detail === 'string') {
+        if (typeof detail === "string") {
             errorMessage = detail;
         } else if (Array.isArray(detail) && detail[0]?.msg) {
             errorMessage = detail[0].msg;
-        } else if (typeof error?.message === 'string') {
+        } else if (typeof error?.message === "string") {
             errorMessage = error.message;
-        } else if (typeof error === 'string') {
+        } else if (typeof error === "string") {
             errorMessage = error;
         }
 

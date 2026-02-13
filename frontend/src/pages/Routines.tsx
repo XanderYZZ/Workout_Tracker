@@ -6,6 +6,6 @@ const Routines: FC = () => {
             <h1>This is under construction.</h1>
         </>
     );
-}
+};
 
 export default Routines;

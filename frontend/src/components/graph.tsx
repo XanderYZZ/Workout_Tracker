@@ -1,5 +1,12 @@
 import type { FC } from "react";
-import { Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import {
+    Line,
+    LineChart,
+    XAxis,
+    YAxis,
+    ResponsiveContainer,
+    Tooltip,
+} from "recharts";
 
 const calculateChartHeight = (dataLength: number) => {
     // Base height: 320px, add 15px for each data point to accommodate rotated labels
@@ -15,7 +22,7 @@ type Props = {
     graphData: GraphPoint[];
     headerText: string;
     tooltipText: string;
-}
+};
 
 type CustomTickProps = {
     x?: number;
@@ -25,7 +32,7 @@ type CustomTickProps = {
     };
 };
 
-export const defaultGraphData: [GraphPoint] = [{ name: "", amount: 0 },];
+export const defaultGraphData: [GraphPoint] = [{ name: "", amount: 0 }];
 
 const CustomXAxisTick: FC<CustomTickProps> = ({ x = 0, y = 0, payload }) => {
     if (!payload) return null;
@@ -44,11 +51,7 @@ const CustomXAxisTick: FC<CustomTickProps> = ({ x = 0, y = 0, payload }) => {
     );
 };
 
-export const Graph: FC<Props> = ({
-    graphData,
-    headerText,
-    tooltipText,
-}) => {
+export const Graph: FC<Props> = ({ graphData, headerText, tooltipText }) => {
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
             const { name, amount } = payload[0].payload;
@@ -56,13 +59,18 @@ export const Graph: FC<Props> = ({
             return (
                 <div className="bg-white-600 text-black p-1 rounded shadow">
                     <p className="font-bold text-shadow-lg">{name}</p>
-                    <p>{tooltipText}: <p className="font-bold text-white text-shadow-lg">{amount}</p></p>
+                    <p>
+                        {tooltipText}:{" "}
+                        <p className="font-bold text-white text-shadow-lg">
+                            {amount}
+                        </p>
+                    </p>
                 </div>
             );
         }
 
         return null;
-    }
+    };
 
     return (
         <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">

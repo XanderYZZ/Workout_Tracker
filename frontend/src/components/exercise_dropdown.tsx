@@ -13,14 +13,16 @@ export const ExerciseDropdown: FC<ExerciseDropdownProps> = ({
     isVisible,
     selectedExerciseName,
     exercises,
-    handleToggle
+    handleToggle,
 }) => {
     const addExercise = (exercise: string) => (
         <li key={exercise}>
             <button
                 onClick={() => handleToggle(exercise)}
                 className={`w-full px-4 py-2 text-left text-gray-900 hover:bg-gray-100 ${
-                    selectedExerciseName === exercise ? "bg-gray-200 font-semibold" : ""
+                    selectedExerciseName === exercise
+                        ? "bg-gray-200 font-semibold"
+                        : ""
                 }`}
             >
                 {exercise}

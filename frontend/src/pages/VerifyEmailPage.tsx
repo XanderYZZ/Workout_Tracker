@@ -24,7 +24,9 @@ const VerifyEmailPage = () => {
         <div className="background-primary flex items-center justify-center">
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
-                    <h2 className="text-3xl font-bold text-white-900 mb-2">Email Verification</h2>
+                    <h2 className="text-3xl font-bold text-white-900 mb-2">
+                        Email Verification
+                    </h2>
                     <p>{status}</p>
                 </div>
             </div>

@@ -1,10 +1,10 @@
 export const DatesLibrary = {
     getDateToLocaleDateTime: (selectedDate: Date): string => {
         const year = selectedDate.getFullYear();
-        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-        const day = String(selectedDate.getDate()).padStart(2, '0');
-        const hours = String(selectedDate.getHours()).padStart(2, '0');
-        const minutes = String(selectedDate.getMinutes()).padStart(2, '0');
+        const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+        const day = String(selectedDate.getDate()).padStart(2, "0");
+        const hours = String(selectedDate.getHours()).padStart(2, "0");
+        const minutes = String(selectedDate.getMinutes()).padStart(2, "0");
         const localDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
 
         return localDateTime;
@@ -25,26 +25,33 @@ export const DatesLibrary = {
     isInvalidDateString: (dateInput: string): boolean => {
         const dateObj = new Date(dateInput);
 
-        return isNaN(dateObj.getTime()); 
+        return isNaN(dateObj.getTime());
     },
 
-    formatDateToLocaleDateString: (dateInput: string, noHoursAndMinutes: boolean = false, noWeekday: boolean = false): string => {
+    formatDateToLocaleDateString: (
+        dateInput: string,
+        noHoursAndMinutes: boolean = false,
+        noWeekday: boolean = false,
+    ): string => {
         let dateFormatOptions: Intl.DateTimeFormatOptions = {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
+            year: "numeric",
+            month: "short",
+            day: "numeric",
         };
 
         if (!noHoursAndMinutes) {
-            dateFormatOptions.hour = '2-digit';
-            dateFormatOptions.minute = '2-digit';
+            dateFormatOptions.hour = "2-digit";
+            dateFormatOptions.minute = "2-digit";
         }
 
         if (!noWeekday) {
-            dateFormatOptions.weekday = 'short';
+            dateFormatOptions.weekday = "short";
         }
 
-        return new Date(dateInput).toLocaleDateString('en-US', dateFormatOptions);
+        return new Date(dateInput).toLocaleDateString(
+            "en-US",
+            dateFormatOptions,
+        );
     },
 
     getFirstDayOfMonth: (date: Date): number => {
@@ -52,11 +59,11 @@ export const DatesLibrary = {
     },
 
     formatDisplayDate: (date: Date): string => {
-        return date.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+        return date.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
         });
     },
 
@@ -69,5 +76,5 @@ export const DatesLibrary = {
     */
     getDaysInMonth: (date: Date): number => {
         return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    }
+    },
 };

@@ -1,46 +1,47 @@
-import type { FC } from 'react'
+import type { FC } from "react";
 import { useState } from "react";
-import { Form } from "../components/form"
-import { useAuth } from '../contexts/auth'
-import { PasswordInput, TextInput } from '../components/text_input';
-import { Link } from 'react-router-dom';
+import { Form } from "../components/form";
+import { useAuth } from "../contexts/auth";
+import { PasswordInput, TextInput } from "../components/text_input";
+import { Link } from "react-router-dom";
 
 const Login: FC = () => {
     const { login, isLoading, errors, isPasswordStrong, setErrors } = useAuth();
 
     const [formData, setFormData] = useState({
-        email_or_username: '',
-        password: ''
+        email_or_username: "",
+        password: "",
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            [name]: value
+            [name]: value,
         }));
     };
 
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
 
-        if (!formData.email_or_username.trim()) newErrors.email_or_username = 'Email or username is required';
+        if (!formData.email_or_username.trim())
+            newErrors.email_or_username = "Email or username is required";
 
-        if (!formData.password) newErrors.password = 'Password is required';
+        if (!formData.password) newErrors.password = "Password is required";
         else if (!isPasswordStrong(formData.password))
-            newErrors.password = 'Password does not meet strength requirements';
+            newErrors.password = "Password does not meet strength requirements";
 
         setErrors(newErrors);
-        
+
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
-        if (!validateForm()) return; 
+        if (!validateForm()) return;
 
         login(formData);
-    }
+    };
 
     return (
         <div className="background-primary flex items-center justify-center">
@@ -78,10 +79,11 @@ const Login: FC = () => {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white transition-colors ${isLoading
-                            ? 'bg-indigo-400 cursor-not-allowed'
-                            : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-                            }`}
+                        className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white transition-colors ${
+                            isLoading
+                                ? "bg-indigo-400 cursor-not-allowed"
+                                : "bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        }`}
                     >
                         {isLoading ? (
                             <div className="flex items-center">
@@ -91,7 +93,14 @@ const Login: FC = () => {
                                     fill="none"
                                     viewBox="0 0 24 24"
                                 >
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                    ></circle>
                                     <path
                                         className="opacity-75"
                                         fill="currentColor"
@@ -101,14 +110,17 @@ const Login: FC = () => {
                                 Signing in...
                             </div>
                         ) : (
-                            'Sign in'
+                            "Sign in"
                         )}
                     </button>
 
                     <div className="text-center mt-4">
                         <p className="text-sm text-gray-200">
-                            Forgot your password?{' '}
-                            <Link to="/reset-password" className="font-medium text-blue-200 hover:text-indigo-500 transition-colors">
+                            Forgot your password?{" "}
+                            <Link
+                                to="/reset-password"
+                                className="font-medium text-blue-200 hover:text-indigo-500 transition-colors"
+                            >
                                 Reset your password
                             </Link>
                         </p>
@@ -117,6 +129,6 @@ const Login: FC = () => {
             </div>
         </div>
     );
-}
+};
 
 export default Login;

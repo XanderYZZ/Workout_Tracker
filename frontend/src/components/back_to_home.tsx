@@ -1,9 +1,7 @@
 import type { FC } from "react";
 import { Link } from "react-router-dom";
 
-export const BackToHomeButton: FC = ({
-
-}) => {
+export const BackToHomeButton: FC = ({}) => {
     return (
         <div className="text-center">
             <Link
