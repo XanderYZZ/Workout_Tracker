@@ -17,7 +17,6 @@ const Routines: FC = () => {
     const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(
         {
             name: "",
-            scheduled_date: new Date().toISOString().slice(0, 16),
             exercises: [],
             comments: "",
         },
