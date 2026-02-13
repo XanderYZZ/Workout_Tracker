@@ -40,17 +40,17 @@ def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
 
 def IsThereAWorkoutWithNameOnSameDate(user_id: str, name: str, date: datetime) -> bool:
     workouts = GetDb()["workouts"]
+
     start_of_day = datetime(date.year, date.month, date.day, tzinfo=timezone.utc)
     end_of_day = datetime(date.year, date.month, date.day, 23, 59, 59, 999999, tzinfo=timezone.utc)
-    escaped_name = re.escape(name.strip())
-    pattern = rf"^\s*{escaped_name}\s*$"
-    existing_workout = workouts.find_one({
+    normalized_name = general_methods.NormalizeName(name)
+    daily_workouts = workouts.find({
         "user_id": user_id,
-        "scheduled_date": {
-            "$gte": start_of_day,
-            "$lte": end_of_day
-        },
-        "name": {"$regex": pattern, "$options": "i"}
+        "scheduled_date": {"$gte": start_of_day, "$lte": end_of_day}
     })
 
-    return existing_workout is not None
+    for workout in daily_workouts:
+        if "name" in workout and general_methods.NormalizeName(workout["name"]) == normalized_name:
+            return True
+
+    return False

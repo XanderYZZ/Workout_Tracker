@@ -4,6 +4,10 @@ from pymongo.results import InsertOneResult
 from typing import Dict, List, Optional
 from ..database_config import GetDb, MakeDatetimeAware
 
+def NormalizeName(s: str) -> str:
+    # Remove ALL whitespace (spaces, tabs, newlines, etc.) and lowercase
+    return "".join(s.split()).lower()
+
 def UpdateCollectionEntry(collection_name: str, entry_id: str, user_id: str, update_data: Dict) -> bool:
     collection = GetDb()[collection_name]
     update_data["updated_at"] = datetime.now(timezone.utc)

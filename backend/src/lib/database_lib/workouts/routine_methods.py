@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional
 from lib.database_lib.database_config import GetDb
 from . import general_methods as general_methods 
-import re
 
 def UpdateRoutine(routine_id: str, user_id: str, update_data: Dict) -> bool:
     return general_methods.UpdateCollectionEntry("routines", routine_id, user_id, update_data)
@@ -20,11 +19,11 @@ def GetRoutinesForUser(user_id: str, limit: int = 50, skip: int = 0) -> List[Dic
 
 def IsThereARoutineWithName(user_id: str, name: str) -> bool:
     routines = GetDb()["routines"]
-    escaped_name = re.escape(name.strip())
-    pattern = rf"^\s*{escaped_name}\s*$"
-    existing_routine = routines.find_one({
-        "user_id": user_id,
-        "name": {"$regex": pattern, "$options": "i"}
-    })
+    normalized_name = general_methods.NormalizeName(name)
+    user_routines = routines.find({"user_id": user_id})
 
-    return existing_routine is not None
+    for routine in user_routines:
+        if "name" in routine and general_methods.NormalizeName(routine["name"]) == normalized_name:
+            return True
+
+    return False
