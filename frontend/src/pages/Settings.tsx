@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/apiclient";
 import { BackButton } from "../components/back_button";
 import { Notifications } from "../lib/notifications";
+import { Card } from "../components/card";
 
 const Settings: FC = () => {
     const queryClient = useQueryClient();
@@ -81,7 +82,7 @@ const Settings: FC = () => {
     }
 
     return (
-        <div className="background-primary flex items-center justify-center min-h-screen">
+        <Card className="background-primary flex items-center justify-center min-h-screen">
             <div className="max-w-md w-full">
                 <div className="card-background p-6">
                     <div className="relative mb-6">
@@ -147,7 +148,7 @@ const Settings: FC = () => {
                     </form>
                 </div>
             </div>
-        </div>
+        </Card>
     );
 };
 
