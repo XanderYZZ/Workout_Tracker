@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { Navbar } from "../components/navbar.tsx";
-import { CalendarPicker } from "../components/calendar_picker";
+import { CalendarPicker } from "../components/dates/calendar_picker.tsx";
 import { DatesLibrary } from "../lib/dates";
 import { Notifications } from "../lib/notifications";
 import { ListedWorkout } from "../components/listed_workout";
@@ -387,6 +387,9 @@ const Workouts: FC = () => {
                         </div>
 
                         <div className="space-y-3 sm:space-y-4">
+                            {editingId ? <>
+                              
+                            </> : <></>}
                             <div>
                                 <label className="block text-sm font-medium text-white mb-1">
                                     Workout Name

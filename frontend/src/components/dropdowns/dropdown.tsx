@@ -1,31 +1,33 @@
 import type { FC } from "react";
 
-interface ExerciseDropdownProps {
+interface DropdownProps {
     toggleDropdown: () => void;
     isVisible: boolean;
-    selectedExerciseName: string | null;
-    exercises: string[];
-    handleToggle: (exercise: string) => void;
+    selectedName: string | null;
+    selections: string[];
+    handleToggle: (selection: string) => void;
+    defaultText: string | null;
 }
 
-export const ExerciseDropdown: FC<ExerciseDropdownProps> = ({
+export const Dropdown: FC<DropdownProps> = ({
     toggleDropdown,
     isVisible,
-    selectedExerciseName,
-    exercises,
+    selectedName,
+    selections,
     handleToggle,
+    defaultText,
 }) => {
-    const addExercise = (exercise: string) => (
-        <li key={exercise}>
+    const addSelection = (selection: string) => (
+        <li key={selection}>
             <button
-                onClick={() => handleToggle(exercise)}
+                onClick={() => handleToggle(selection)}
                 className={`w-full px-4 py-2 text-left text-gray-900 hover:bg-gray-100 ${
-                    selectedExerciseName === exercise
+                    selectedName === selection
                         ? "bg-gray-200 font-semibold"
                         : ""
                 }`}
             >
-                {exercise}
+                {selection}
             </button>
         </li>
     );
@@ -36,17 +38,17 @@ export const ExerciseDropdown: FC<ExerciseDropdownProps> = ({
                 onClick={toggleDropdown}
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-left text-gray-900 shadow-sm"
             >
-                {selectedExerciseName || "Select an Exercise"}
+                {selectedName || defaultText || "Select an Option"}
                 <span className="float-right">{isVisible ? "▲" : "▼"}</span>
             </button>
 
             {isVisible && (
                 <ul className="absolute z-10 mt-2 max-h-60 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg">
-                    {exercises.map(addExercise)}
+                    {selections.map(addSelection)}
                 </ul>
             )}
         </div>
     );
 };
 
-export default ExerciseDropdown;
+export default Dropdown;

@@ -2,9 +2,9 @@ import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { isEqual } from "lodash";
 import { Navbar } from "../components/navbar";
-import { ExerciseDropdown } from "../components/exercise_dropdown";
+import { ExerciseDropdown } from "../components/dropdowns/exercise_dropdown";
 import { ListedWorkout } from "../components/listed_workout";
-import { CalendarPicker } from "../components/calendar_picker";
+import { CalendarPicker } from "../components/dates/calendar_picker";
 import { DatesLibrary } from "../lib/dates";
 import { Notifications } from "../lib/notifications";
 import { Graph, type GraphPoint, defaultGraphData } from "../components/graph";
@@ -308,8 +308,8 @@ const Reports: FC = () => {
             <ExerciseDropdown
                 toggleDropdown={toggleDropdown}
                 isVisible={dropdownVisible}
-                selectedExerciseName={selectedExerciseName}
-                exercises={exercises}
+                selectedName={selectedExerciseName}
+                selections={exercises}
                 handleToggle={handleToggle}
             />
         );
@@ -358,13 +358,7 @@ const Reports: FC = () => {
                                     contain it.
                                 </h1>
 
-                                <ExerciseDropdown
-                                    toggleDropdown={toggleDropdown}
-                                    isVisible={dropdownVisible}
-                                    selectedExerciseName={selectedExerciseName}
-                                    exercises={exercises}
-                                    handleToggle={handleToggle}
-                                />
+                                {createExerciseDropdown()}
 
                                 {/* Report Panel */}
                                 <div className="w-full rounded-xl bg-white p-6 shadow-md">

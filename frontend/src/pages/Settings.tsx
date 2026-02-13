@@ -2,7 +2,7 @@ import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/apiclient";
-import { BackButton } from "../components/back_button";
+import { BackButton } from "../components/basic_buttons/back_button";
 import { Notifications } from "../lib/notifications";
 import { Card } from "../components/card";
 

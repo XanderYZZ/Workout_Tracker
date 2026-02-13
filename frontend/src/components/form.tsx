@@ -1,5 +1,5 @@
 import type { FC, ReactNode, FormHTMLAttributes } from "react";
-import { BackToHomeButton } from "./back_to_home";
+import { BackToHomeButton } from "./basic_buttons/back_to_home";
 
 interface FormProps extends FormHTMLAttributes<HTMLFormElement> {
     children: ReactNode;

@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DatesLibrary } from "../lib/dates";
+import { DatesLibrary } from "../../lib/dates";
 
 interface CalendarPickerProps {
     selectedDate: Date;
