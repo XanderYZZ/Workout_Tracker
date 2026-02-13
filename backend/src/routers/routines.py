@@ -23,9 +23,6 @@ async def CreateRoutine(
     now = datetime.now(timezone.utc)
     routine_dict["created_at"] = now
 
-    if routine_methods.IsThereARoutineWithName(current_user.user_id, routine_dict["name"]):
-        raise APIError.validation_error(ErrorMessage.ENTRY_WITH_NAME_ALREADY_EXISTS.format(name=routine_dict["name"]))
-
     routine_id = routine_methods.CreateRoutine(routine_dict)
     created_routine = routine_methods.GetRoutineById(routine_id, current_user.user_id)
     

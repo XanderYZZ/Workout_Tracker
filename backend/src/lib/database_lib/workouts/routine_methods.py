@@ -15,6 +15,3 @@ def GetRoutineById(routine_id: str, user_id: str) -> Optional[Dict]:
 
 def GetRoutinesForUser(user_id: str, limit: int = 50, skip: int = 0) -> List[Dict]:
     return general_methods.GetCollectionEntriesForUser("routines", user_id, None, None, limit, skip)
-
-def IsThereARoutineWithName(user_id: str, name: str) -> bool:
-    return general_methods.IsThereAnEntryWithName("routines", user_id, name)

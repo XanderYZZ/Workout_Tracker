@@ -4,12 +4,6 @@ from pymongo.results import InsertOneResult
 from typing import Dict, List, Optional
 from ..database_config import GetDb, MakeDatetimeAware
 
-def IsThereAnEntryWithName(collection_name: str, user_id: str, name: str) -> bool:
-    collection = GetDb()[collection_name]
-    existing_entry = collection.find_one({"user_id": user_id, "name": name})
-    
-    return existing_entry is not None
-
 def UpdateCollectionEntry(collection_name: str, entry_id: str, user_id: str, update_data: Dict) -> bool:
     collection = GetDb()[collection_name]
     update_data["updated_at"] = datetime.now(timezone.utc)

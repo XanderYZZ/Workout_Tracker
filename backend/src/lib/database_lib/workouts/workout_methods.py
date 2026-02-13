@@ -37,5 +37,19 @@ def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
     
     return count
 
-def IsThereAWorkoutWithName(user_id: str, name: str) -> bool:
-    return general_methods.IsThereAnEntryWithName("workouts", user_id, name)
+def IsThereAWorkoutWithNameOnSameDate(user_id: str, name: str, date: datetime) -> bool:
+    workouts = GetDb()["workouts"]
+
+    start_of_day = datetime(date.year, date.month, date.day, tzinfo=timezone.utc)
+    end_of_day = datetime(date.year, date.month, date.day, 23, 59, 59, 999999, tzinfo=timezone.utc)
+
+    existing_workout = workouts.find_one({
+        "user_id": user_id,
+        "name": name,
+        "scheduled_date": {
+            "$gte": start_of_day,
+            "$lte": end_of_day
+        }
+    })
+
+    return existing_workout is not None

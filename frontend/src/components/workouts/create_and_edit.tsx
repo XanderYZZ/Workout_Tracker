@@ -8,6 +8,7 @@ import { RoutineDropdown } from "../dropdowns/routine_dropdown.tsx";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import { useRoutines } from "../../contexts/routines";
+import { DatesLibrary } from "../../lib/dates.tsx";
 
 type ValidEditType = "workouts" | "routines";
 
@@ -85,25 +86,46 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
 
     const routines = useRoutines();
 
+    const handleChange = (field: string, value: any) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const [prevRoutineName, setPrevRoutineName] = useState<string>("");
+
     useEffect(() => {
-        if (editType != "workouts" || !selectedRoutineName) return;
+        if (editType !== "workouts") return;
 
-        const selectedRoutine = routines.find(
-            (routine) => routine.name === selectedRoutineName,
-        );
+        const prevValid = routines.some(r => r.name === prevRoutineName);
+        const currValid = routines.some(r => r.name === selectedRoutineName);
 
-        if (!selectedRoutine) {
-            setFormData(defaultFormData);
-            return;
+        if (prevValid && !currValid) {
+            setFormData({
+                ...defaultFormData,
+                scheduled_date: DatesLibrary.getDateToLocaleDateTime(new Date()), 
+            });
         }
 
-        setFormData({
-            name: selectedRoutine.name + " Copy",
-            exercises: selectedRoutine.exercises,
-            comments: selectedRoutine.comments,
-            scheduled_date: formData.scheduled_date,
-        });
-    }), [selectedRoutineName];
+        if (currValid) {
+            const selectedRoutine = routines.find(
+                (r) => r.name === selectedRoutineName
+            )!;
+            setFormData({
+                name: selectedRoutine.name + " Copy",
+                exercises: selectedRoutine.exercises,
+                comments: selectedRoutine.comments,
+                scheduled_date: DatesLibrary.getDateToLocaleDateTime(new Date()), 
+            });
+        }
+
+        setPrevRoutineName(selectedRoutineName); 
+    }, [selectedRoutineName, routines, editType]);
+
+    useEffect(() => {
+        if (isCreating) return;
+
+        setFormData(defaultFormData);
+        setSelectedRoutineName("");
+    }), [isCreating]
 
     const createWorkoutOrRoutine = useMutation({
         mutationFn: (data: WorkoutFormData | RoutineFormData) =>
@@ -283,12 +305,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                             <input
                                 type="text"
                                 value={formData.name}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        name: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => handleChange("name", e.target.value)}
                                 className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="e.g., Upper Body Strength"
                             />
@@ -303,12 +320,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                                     <input
                                         type="datetime-local"
                                         value={formData.scheduled_date}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                scheduled_date: e.target.value,
-                                            })
-                                        }
+                                        onChange={(e) => handleChange("scheduled_date", e.target.value)}
                                         className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
                                 </div>
@@ -412,12 +424,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                             <textarea
                                 maxLength={250}
                                 value={formData.comments}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        comments: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => handleChange("comments", e.target.value)}
                                 rows={3}
                                 className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="Additional comments or instructions..."
