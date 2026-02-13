@@ -50,7 +50,10 @@ def IsThereAWorkoutWithNameOnSameDate(user_id: str, name: str, date: datetime) -
             "$lte": end_of_day
         },
         "$expr": {
-            "$eq": [{"$toLower": "$name"}, name.lower()]
+            "$eq": [
+                {"$toLower": {"$trim": {"input": "$name"}}}, 
+                name.strip().lower()                       
+            ]
         }
     })
 

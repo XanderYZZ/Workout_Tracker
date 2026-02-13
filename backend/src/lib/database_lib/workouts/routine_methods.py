@@ -21,7 +21,12 @@ def IsThereARoutineWithName(user_id: str, name: str) -> bool:
     routines = GetDb()["routines"]
     existing_routine = routines.find_one({
         "user_id": user_id,
-        "$expr": {"$eq": [{"$toLower": "$name"}, name.lower()]}
+        "$expr": {
+            "$eq": [
+                {"$toLower": {"$trim": {"input": "$name"}}}, 
+                name.strip().lower()                       
+            ]
+        }
     })
 
     return existing_routine is not None
