@@ -1,26 +1,19 @@
 import type { FC } from "react";
 import { useState } from "react";
-import { apiClient } from "../lib/apiclient";
 import {
     Calendar,
     Plus,
-    X,
-    Check,
     ChevronLeft,
     ChevronRight,
 } from "lucide-react";
-import Swal from "sweetalert2";
 import { Navbar } from "../components/navbar.tsx";
 import { CalendarPicker } from "../components/dates/calendar_picker.tsx";
 import { DatesLibrary } from "../lib/dates";
-import { Notifications } from "../lib/notifications";
 import { ListedWorkout } from "../components/workouts/listed_workout.tsx";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWorkouts } from "../contexts/workouts";
 import { useNavigate } from "react-router";
 import { Card } from "../components/card.tsx";
-import { CreateAndEdit } from "../components/workouts/create_and_edit.tsx";
-import { hasScheduledDate } from "../components/workouts/common_methods.tsx";
+import { CreateAndEdit, useDeleteItem } from "../components/workouts/create_and_edit.tsx";
 
 const Workouts: FC = () => {
     const [isCreating, setIsCreating] = useState(false);
@@ -31,6 +24,7 @@ const Workouts: FC = () => {
 
     const workouts = useWorkouts();
     const navigate = useNavigate();
+    const deleteWorkoutOrRoutine = useDeleteItem("workouts");
 
     const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(
         {
@@ -40,103 +34,6 @@ const Workouts: FC = () => {
             comments: "",
         },
     );
-
-    const queryClient = useQueryClient();
-
-    const createWorkout = useMutation({
-        mutationFn: (data: WorkoutFormData | RoutineFormData) =>
-            apiClient
-                .post("/workouts/", {
-                    ...data,
-                    scheduled_date: hasScheduledDate(data)
-                        ? new Date(data.scheduled_date).toISOString()
-                        : undefined,
-                })
-                .then((res) => res.data),
-        onSuccess: (newWorkout) => {
-            queryClient.setQueryData<Workout[]>(
-                ["workouts"],
-                (oldWorkouts = []) => [...oldWorkouts, newWorkout],
-            );
-            resetForm();
-            setIsCreating(false);
-            Notifications.showSuccess("Workout created successfully!");
-        },
-        onError: (err: any) => Notifications.showError(err),
-    });
-
-    const updateWorkout = useMutation({
-        mutationFn: ({
-            workoutId,
-            data,
-        }: {
-            workoutId: string;
-            data: WorkoutFormData | RoutineFormData;
-        }) =>
-            apiClient
-                .put(`/workouts/${workoutId}`, {
-                    ...data,
-                    scheduled_date: hasScheduledDate(data)
-                        ? new Date(data.scheduled_date).toISOString()
-                        : undefined,
-                })
-                .then((res) => res.data),
-        onSuccess: (updatedWorkout) => {
-            queryClient.setQueryData<Workout[]>(
-                ["workouts"],
-                (oldWorkouts = []) => {
-                    return oldWorkouts.map((workout) => {
-                        if (workout.id === updatedWorkout.id) {
-                            return updatedWorkout;
-                        }
-                        return workout;
-                    });
-                },
-            );
-
-            resetForm();
-            setEditingId(null);
-            Notifications.showSuccess("Workout updated successfully!");
-        },
-        onError: (err: any) => Notifications.showError(err),
-    });
-
-    const deleteWorkoutMutation = useMutation({
-        mutationFn: (workoutId: string) =>
-            apiClient.delete(`/workouts/${workoutId}`).then((res) => res.data),
-        onSuccess: (_, workoutId) => {
-            queryClient.setQueryData<Workout[]>(
-                ["workouts"],
-                (oldWorkouts = []) =>
-                    oldWorkouts.filter((workout) => workout.id !== workoutId),
-            );
-            setEditingId(null);
-            Notifications.showSuccess("Workout deleted successfully!");
-        },
-        onError: (err: any) => Notifications.showError(err),
-    });
-
-    const deleteWorkout = async (workoutId: string) => {
-        // Show the confirmation screen before deleting the workout.
-        const result = await Swal.fire({
-            title: "Are you sure you want to delete this workout?",
-            text: "This cannot be undone.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes",
-            cancelButtonText: "No",
-            confirmButtonColor: "rgb(19, 119, 39)",
-            cancelButtonColor: "rgb(150, 12, 14)",
-            background: "rgb(15, 15, 15)",
-            color: "#f8fafc",
-        });
-
-        if (!result.isConfirmed) {
-            return;
-        }
-
-        deleteWorkoutMutation.mutate(workoutId);
-    };
 
     const resetForm = () => {
         setFormData({
@@ -310,6 +207,7 @@ const Workouts: FC = () => {
 
                 {/* Create/Edit Form */}
                 <CreateAndEdit
+                    editType={"workouts"}
                     isCreating={isCreating}
                     setIsCreating={setIsCreating}
                     setEditingId={setEditingId}
@@ -317,12 +215,6 @@ const Workouts: FC = () => {
                     editingId={editingId}
                     formData={formData}
                     setFormData={setFormData}
-                    createWorkoutOrRoutine={(data) =>
-                        createWorkout.mutate(data)
-                    }
-                    updateWorkoutOrRoutine={({ id, data }) =>
-                        updateWorkout.mutate({ workoutId: id, data })
-                    }
                 />
 
                 <div className="mt-6 sm:mt-8">
@@ -354,7 +246,7 @@ const Workouts: FC = () => {
                                         expandedId={expandedId}
                                         setExpandedId={setExpandedId}
                                         startEdit={startEdit}
-                                        deleteWorkout={deleteWorkout}
+                                        deleteWorkout={deleteWorkoutOrRoutine}
                                     />
                                 ),
                             )

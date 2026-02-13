@@ -2,6 +2,10 @@ import { useState, type FC } from "react";
 import { Navbar } from "../components/navbar";
 import { useRoutines } from "../contexts/routines";
 import ListedRoutine from "../components/workouts/listed_routine";
+import { Plus } from "lucide-react";
+import { BackButton } from "../components/basic_buttons/back_button";
+import { CreateAndEdit } from "../components/workouts/create_and_edit.tsx";
+import { useMutation } from "@tanstack/react-query";
 
 const Routines: FC = () => {
     const [isCreating, setIsCreating] = useState(false);
@@ -9,6 +13,23 @@ const Routines: FC = () => {
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
     const routines = useRoutines();
+
+    const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(
+        {
+            name: "",
+            scheduled_date: new Date().toISOString().slice(0, 16),
+            exercises: [],
+            comments: "",
+        },
+    );
+
+    const resetForm = () => {
+        setFormData({
+            name: "",
+            exercises: [],
+            comments: "",
+        });
+    };
 
     return (
         <>
@@ -22,8 +43,35 @@ const Routines: FC = () => {
                                     My Routines (Work in Progress)
                                 </h1>
                             </div>
+
+                            <div className="mt-16 flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+                                <BackButton className="flex items-center gap-2 bg-[#2A2A3D] text-white px-3 py-3 rounded-lg hover:bg-gray-600 transition-colors justify-center sm:justify-start" />
+                                <button
+                                    onClick={() => {
+                                        resetForm();
+                                        setIsCreating(true);
+                                        setEditingId(null);
+                                    }}
+                                    className="flex items-center gap-2 bg-[#2A2A3D] text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full sm:w-auto justify-center sm:justify-start"
+                                >
+                                    <Plus size={20} />
+                                    New Routine
+                                </button>
+                            </div>
                         </div>
                     </div>
+
+                    {/* Create/Edit Form */}
+                    <CreateAndEdit
+                        editType={"routines"}
+                        isCreating={isCreating}
+                        setIsCreating={setIsCreating}
+                        setEditingId={setEditingId}
+                        resetForm={resetForm}
+                        editingId={editingId}
+                        formData={formData}
+                        setFormData={setFormData}
+                    />
 
                     <div className="mt-6 sm:mt-8">
                         <div className="space-y-4">

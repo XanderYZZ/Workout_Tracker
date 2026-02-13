@@ -1,8 +1,15 @@
 import { Check, Plus, X } from "lucide-react";
 import Card from "../card";
 import { hasScheduledDate } from "./common_methods.tsx";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../lib/apiclient.tsx";
+import { Notifications } from "../../lib/notifications.tsx";
+import Swal from "sweetalert2";
+
+type ValidEditType = "workouts" | "routines";
 
 interface CreateAndEditProps {
+    editType: ValidEditType;
     isCreating: boolean;
     setIsCreating: (value: boolean) => void;
     editingId: string | null;
@@ -12,14 +19,47 @@ interface CreateAndEditProps {
     setFormData: React.Dispatch<
         React.SetStateAction<WorkoutFormData | RoutineFormData>
     >;
-    updateWorkoutOrRoutine: (data: {
-        id: string;
-        data: WorkoutFormData | RoutineFormData;
-    }) => void;
-    createWorkoutOrRoutine: (data: WorkoutFormData | RoutineFormData) => void;
+}
+
+export function useDeleteItem(editType: ValidEditType) {
+    const queryClient = useQueryClient();
+    const endpoint = `/${editType}/`;
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => apiClient.delete(`${endpoint}${id}`).then(res => res.data),
+        onSuccess: (_, id) => {
+            queryClient.setQueryData<any[]>([editType], (oldList = []) =>
+                oldList.filter((item: any) => item.id !== id)
+            );
+            Notifications.showSuccess(editType === "workouts" ? "Workout deleted" : "Routine deleted");
+        },
+        onError: (err: any) => Notifications.showError(err),
+    });
+
+    const deleteItem = async (id: string) => {
+        const result = await Swal.fire({
+            title: `Are you sure you want to delete this ${editType === "workouts" ? "workout" : "routine"}?`,
+            text: "This cannot be undone.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            confirmButtonColor: "rgb(19, 119, 39)",
+            cancelButtonColor: "rgb(150, 12, 14)",
+            background: "rgb(15, 15, 15)",
+            color: "#f8fafc",
+        });
+
+        if (result.isConfirmed) {
+            deleteMutation.mutate(id);
+        }
+    };
+
+    return deleteItem;
 }
 
 export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
+    editType,
     isCreating,
     setIsCreating,
     editingId,
@@ -27,9 +67,72 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
     resetForm,
     formData,
     setFormData,
-    updateWorkoutOrRoutine,
-    createWorkoutOrRoutine,
 }) => {
+    const endpoint = `/${editType}/`;
+    const queryClient = useQueryClient();
+    type EditTypeMap = {
+        workouts: Workout[];
+        routines: Routine[];
+    };
+    
+    const createWorkoutOrRoutine = useMutation({
+        mutationFn: (data: WorkoutFormData | RoutineFormData) =>
+            apiClient
+                .post(endpoint, {
+                    ...data,
+                    scheduled_date: hasScheduledDate(data)
+                        ? new Date(data.scheduled_date).toISOString()
+                        : undefined,
+                })
+                .then((res) => res.data),
+        onSuccess: (newList: any) => {
+            queryClient.setQueryData<EditTypeMap[typeof editType]>(
+                [editType],
+                (oldList = []) => [...oldList, newList],
+            );
+            resetForm();
+            setIsCreating(false);
+            Notifications.showSuccess(editType === "workouts" ? "Workout created!" : "Routine created!");
+        },
+        onError: (err: any) => Notifications.showError(err),
+    });
+
+    const updateWorkoutOrRoutine = useMutation({
+        mutationFn: ({
+            id,
+            data,
+        }: {
+            id: string;
+            data: WorkoutFormData | RoutineFormData;
+        }) =>
+            apiClient
+                .put(`${endpoint}${id}`, {
+                    ...data,
+                    scheduled_date: hasScheduledDate(data)
+                        ? new Date(data.scheduled_date).toISOString()
+                        : undefined,
+                })
+                .then((res) => res.data),
+        onSuccess: (updatedWorkout) => {
+            queryClient.setQueryData<Workout[]>(
+                [editType],
+                (oldWorkouts = []) => {
+                    return oldWorkouts.map((workout) => {
+                        if (workout.id === updatedWorkout.id) {
+                            return updatedWorkout;
+                        }
+                        return workout;
+                    });
+                },
+            );
+
+            resetForm();
+            setEditingId(null);
+            Notifications.showSuccess(editType === "workouts" ? "Workout updated!" : "Routine updated!");
+        },
+        onError: (err: any) => Notifications.showError(err),
+    });
+
     const addExercise = () => {
         setFormData({
             ...formData,
@@ -94,7 +197,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                 <Card className="*:p-2">
                     <div className="flex items-center justify-between gap-2">
                         <h2 className="text-lg sm:text-xl font-semibold text-white">
-                            {editingId ? "Edit Workout" : "Create New Workout"}
+                            {editingId ? "Edit " + (editType == "workouts" ? "Workout" : "Routine") : "Create New " + (editType == "workouts" ? "Workout" : "Routine")}
                         </h2>
                         <button
                             onClick={() => {
@@ -112,7 +215,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                         {editingId ? <></> : <></>}
                         <div>
                             <label className="block text-sm font-medium text-white mb-1">
-                                Workout Name
+                                {editType == "workouts" ? "Workout Name" : "Routine Name"}
                             </label>
                             <input
                                 type="text"
@@ -128,7 +231,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                             />
                         </div>
 
-                        {hasScheduledDate(formData) && (
+                        {editType == "workouts" && hasScheduledDate(formData) && (
                             <div>
                                 <label className="block text-sm font-medium text-white mb-1">
                                     Scheduled Date & Time
@@ -261,18 +364,18 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                             <button
                                 onClick={() =>
                                     editingId
-                                        ? updateWorkoutOrRoutine({
+                                        ? updateWorkoutOrRoutine.mutate({
                                               id: editingId,
                                               data: formData,
                                           })
-                                        : createWorkoutOrRoutine(formData)
+                                        : createWorkoutOrRoutine.mutate(formData)
                                 }
                                 className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
                             >
                                 <Check size={20} />
                                 {editingId
-                                    ? "Update Workout"
-                                    : "Create Workout"}
+                                    ? "Update"
+                                    : "Create"}
                             </button>
                             <button
                                 onClick={() => {
