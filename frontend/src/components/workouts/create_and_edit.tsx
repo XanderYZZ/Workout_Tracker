@@ -238,6 +238,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
         return (
             <input
                 type={input_type}
+                min="0"
                 value={exercise[attribute as keyof Exercise] as string}
                 onChange={(e) =>
                     updateExercise(
