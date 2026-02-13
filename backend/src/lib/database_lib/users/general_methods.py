@@ -6,72 +6,27 @@ import config
 # Both the email and the username must be unique at this point in time.
 # This might change in the future.
 def IsUserInUsersCollection(users_collection, email: str | None = None, username: str | None = None) -> bool:
-    """
-    IsUserInUsersCollection
-    
-    :param users_collection: users or pending_users
-    :param email: email for user (optional)
-    :type email: str | None
-    :param username: username for user (optional)
-    :type username: str | None
-    :return: returns if user exists in the users_collection 
-    :rtype: bool
-    """
     if not email and not username:
         raise ValueError("email or username must be provided to IsUserInUsersCollection!")
 
     return users_collection.find_one({"email": email}) or users_collection.find_one({"username": username})
 
 def DoesPendingUserExist(email: str | None = None, username: str | None = None) -> bool:
-    """
-    Docstring for DoesPendingUserExist
-    
-    :param email: user email
-    :type email: str | None
-    :param username: username
-    :type username: str | None
-    :return: returns if the pending user exists
-    :rtype: bool
-    """
     pending_users = GetDb()["pending_users"]
 
     return IsUserInUsersCollection(pending_users, email, username)
 
 def DoesVerifiedUserExist(email: str | None = None, username: str | None = None) -> bool:
-    """
-    Docstring for DoesVerifiedUserExist
-    
-    :param email: email
-    :type email: str | None
-    :param username: username
-    :type username: str | None
-    :return: if the verified user exists
-    :rtype: bool
-    """
     users = GetDb()["users"]
 
     return IsUserInUsersCollection(users, email, username)
 
 def GetPendingUserByEmail(email: str) -> Optional[Dict]:
-    """
-    Docstring for GetPendingUserByEmail
-    
-    :param email: email
-    :type email: str
-    :return: returns the pending user by email if they exist
-    :rtype: Dict | None
-    """
     pending_users = GetDb()["pending_users"]
 
     return pending_users.find_one({"email": email})
 
 def DeletePendingUserByEmail(email: str) -> None:
-    """
-    Docstring for DeletePendingUserByEmail
-    
-    :param email: email
-    :type email: str
-    """
     pending_users = GetDb()["pending_users"]
     pending_users.delete_one({"email": email})
 

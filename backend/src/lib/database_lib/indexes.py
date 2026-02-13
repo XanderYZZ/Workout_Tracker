@@ -72,6 +72,20 @@ INDEX_DEFINITIONS = {
             {"name": "workouts_id_user_id"}
         ),
     ],
+    "routines": [
+        (
+            [("user_id", pymongo.ASCENDING),],
+            {"name": "routines_user_id"}
+        ),
+        (
+            [("user_id", pymongo.ASCENDING), ("exercises.name", pymongo.ASCENDING)],
+            {"name": "routines_user_id_exercise_name"}
+        ),
+        (
+            [("_id", pymongo.ASCENDING), ("user_id", pymongo.ASCENDING)],
+            {"name": "routines_id_user_id"}
+        ),
+    ],
 }
 
 def EnsureIndexes() -> None:

@@ -42,10 +42,10 @@ class ExercisesRequired(BaseModel):
 class Workout(NameRequired, ScheduledDateRequired, ExercisesRequired):
     comments: Optional[str] = None
 
-class RoutineCreate(NameRequired, ExercisesRequired):
+class Routine(NameRequired, ExercisesRequired):
     pass
 
-class WorkoutResponse(Workout):
+class UserCreation(BaseModel):
     id: str
     user_id: str
     created_at: AwareDatetime 
@@ -55,6 +55,12 @@ class WorkoutResponse(Workout):
             datetime: lambda v: v.isoformat()
         }
     }
+
+class WorkoutResponse(Workout, UserCreation):
+    pass
+
+class RoutineResponse(Routine, UserCreation):
+    pass
 
 class TokenResponse(BaseModel):
     access_token: str

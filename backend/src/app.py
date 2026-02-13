@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
-from routers import auth, workouts, settings
+from routers import auth, workouts, settings, routines
 from config import limiter
 from lib.database_lib import indexes
 from fastapi.responses import JSONResponse
@@ -45,6 +45,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(workouts.router)
 app.include_router(settings.router)
+app.include_router(routines.router)
 
 @app.get("/")
 async def root():

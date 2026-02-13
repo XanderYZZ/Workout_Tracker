@@ -3,7 +3,7 @@ from bson import ObjectId
 from fastapi import Query, Request, status, APIRouter, Depends
 from lib.database_lib import models 
 from lib.database_lib.users import auth_helper 
-from lib.database_lib.workouts import general_methods as general_workout_methods
+from lib.database_lib.workouts import workout_methods as general_workout_methods
 from datetime import datetime, timezone
 import config 
 from config import limiter
@@ -51,8 +51,8 @@ async def CreateWorkout(
 @limiter.limit("20/minute")
 async def UpdateWorkout(
     request: Request,
-    workout_id : str,
-    workout_update : models.Workout,
+    workout_id: str,
+    workout_update: models.Workout,
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
     if not ObjectId.is_valid(workout_id):
@@ -114,21 +114,3 @@ async def list_workouts(
     )
 
     return [models.WorkoutResponse(**w) for w in workouts]
-
-# GET SINGLE
-@router.get("/{workout_id}", response_model=models.WorkoutResponse)
-@limiter.limit("30/minute")
-async def GetWorkout(
-    request: Request,
-    workout_id: str,
-    current_user = Depends(auth_helper.GetCurrentUser)
-):
-    if not ObjectId.is_valid(workout_id):
-        raise APIError.validation_error(ErrorMessage.INVALID_ID)
-
-    workout = general_workout_methods.GetWorkoutById(workout_id, current_user.user_id)
-
-    if not workout:
-        raise APIError.not_found(ErrorMessage.WORKOUT_NOT_FOUND)
-    
-    return models.WorkoutResponse(**workout)

@@ -124,9 +124,9 @@ const Workouts: FC = () => {
             showCancelButton: true,
             confirmButtonText: "Yes",
             cancelButtonText: "No",
-            confirmButtonColor: "#499c59ff",
-            cancelButtonColor: "#cc3e41ff",
-            background: "#323234ff",
+            confirmButtonColor: "rgb(0, 235, 47)",
+            cancelButtonColor: "rgb(239, 11, 15)",
+            background: "rgb(15, 15, 15)",
             color: "#f8fafc",
         });
 
