@@ -18,7 +18,9 @@ const Routines: FC = () => {
         comments: "",
     };
 
-    const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(defaultFormData);
+    const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(
+        defaultFormData,
+    );
 
     return (
         <>

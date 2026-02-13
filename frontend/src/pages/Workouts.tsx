@@ -31,7 +31,9 @@ const Workouts: FC = () => {
         comments: "",
     };
 
-    const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(defaultFormData);
+    const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(
+        defaultFormData,
+    );
 
     const startEdit = (workout: Workout | Routine) => {
         setFormData({
@@ -204,7 +206,9 @@ const Workouts: FC = () => {
                     editingId={editingId}
                     formData={formData}
                     setFormData={setFormData}
-                    selectedDate={DatesLibrary.getDateToLocaleDateTime(selectedDate)}
+                    selectedDate={DatesLibrary.getDateToLocaleDateTime(
+                        selectedDate,
+                    )}
                 />
 
                 <div className="mt-6 sm:mt-8">

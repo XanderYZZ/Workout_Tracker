@@ -88,7 +88,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
     const routines = useRoutines();
 
     const handleChange = (field: string, value: any) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     const [prevRoutineName, setPrevRoutineName] = useState<string>("");
@@ -96,37 +96,38 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
     useEffect(() => {
         if (editType !== "workouts") return;
 
-        const prevValid = routines.some(r => r.name === prevRoutineName);
-        const currValid = routines.some(r => r.name === selectedRoutineName);
+        const prevValid = routines.some((r) => r.name === prevRoutineName);
+        const currValid = routines.some((r) => r.name === selectedRoutineName);
 
         if (prevValid && !currValid) {
             setFormData({
                 ...defaultFormData,
-                scheduled_date: selectedDate, 
+                scheduled_date: selectedDate,
             });
         }
 
         if (currValid) {
             const selectedRoutine = routines.find(
-                (r) => r.name === selectedRoutineName
+                (r) => r.name === selectedRoutineName,
             )!;
             setFormData({
                 name: selectedRoutine.name + " Copy",
                 exercises: selectedRoutine.exercises,
                 comments: selectedRoutine.comments,
-                scheduled_date: selectedDate, 
+                scheduled_date: selectedDate,
             });
         }
 
-        setPrevRoutineName(selectedRoutineName); 
+        setPrevRoutineName(selectedRoutineName);
     }, [selectedRoutineName, routines, editType]);
 
-    useEffect(() => {
+    (useEffect(() => {
         if (isCreating) return;
 
         setFormData(defaultFormData);
         setSelectedRoutineName("");
-    }), [isCreating]
+    }),
+        [isCreating]);
 
     const createWorkoutOrRoutine = useMutation({
         mutationFn: (data: WorkoutFormData | RoutineFormData) =>
@@ -293,7 +294,9 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                                     setSelectedName={setSelectedRoutineName}
                                     isVisible={dropdownVisible}
                                     selectedName={selectedRoutineName}
-                                    selections={routines.map((routine: Routine) => routine.name)}
+                                    selections={routines.map(
+                                        (routine: Routine) => routine.name,
+                                    )}
                                 />
                             </div>
                         )}
@@ -306,7 +309,9 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                             <input
                                 type="text"
                                 value={formData.name}
-                                onChange={(e) => handleChange("name", e.target.value)}
+                                onChange={(e) =>
+                                    handleChange("name", e.target.value)
+                                }
                                 className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="e.g., Upper Body Strength"
                             />
@@ -321,7 +326,12 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                                     <input
                                         type="datetime-local"
                                         value={formData.scheduled_date}
-                                        onChange={(e) => handleChange("scheduled_date", e.target.value)}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "scheduled_date",
+                                                e.target.value,
+                                            )
+                                        }
                                         className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
                                 </div>
@@ -425,7 +435,9 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                             <textarea
                                 maxLength={250}
                                 value={formData.comments}
-                                onChange={(e) => handleChange("comments", e.target.value)}
+                                onChange={(e) =>
+                                    handleChange("comments", e.target.value)
+                                }
                                 rows={3}
                                 className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="Additional comments or instructions..."
