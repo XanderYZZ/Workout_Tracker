@@ -4,7 +4,10 @@ import { useRoutines } from "../contexts/routines";
 import ListedRoutine from "../components/workouts/listed_routine";
 import { Plus } from "lucide-react";
 import { BackButton } from "../components/basic_buttons/back_button";
-import { CreateAndEdit, useDeleteItem } from "../components/workouts/create_and_edit.tsx";
+import {
+    CreateAndEdit,
+    useDeleteItem,
+} from "../components/workouts/create_and_edit.tsx";
 
 const Routines: FC = () => {
     const [isCreating, setIsCreating] = useState(false);
