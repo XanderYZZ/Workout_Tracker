@@ -47,7 +47,7 @@ const Routines: FC = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
                             <div>
                                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                                    My Routines (Work in Progress)
+                                    My Routines
                                 </h1>
                             </div>
 
