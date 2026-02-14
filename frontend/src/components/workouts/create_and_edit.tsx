@@ -283,11 +283,11 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                         </button>
                     </div>
 
-                    <div className="space-y-3 sm:space-y-4">
+                    <div className="space-y-3 sm:space-y-3">
                         {editingId ? <></> : <></>}
                         {editType == "workouts" && isCreating && (
                             <div>
-                                <label className="block text-sm font-medium text-white mb-2">
+                                <label className="block text-sm font-medium text-white mb-3">
                                     Select a routine template to copy (optional)
                                 </label>
                                 <RoutineDropdown
