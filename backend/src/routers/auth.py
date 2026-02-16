@@ -13,23 +13,21 @@ import config
 router = APIRouter(tags=["auth"], prefix="/auth")
 
 def ResponseSetCookieHelper(response: Response, refresh_token: str, device_id: str):
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=config.IS_PRODUCTION,               
-        samesite="none" if config.IS_PRODUCTION else "lax",
-        path="/",
-        max_age=config.REFRESH_TOKEN_DAYS * 24 * 60 * 60,
-    )
-
-    response.set_cookie(
-        key="device_id",
-        value=device_id,
-        httponly=True,
-        secure=config.IS_PRODUCTION,
-        samesite="none" if config.IS_PRODUCTION else "lax",
-    )
+    cookie_config = {
+        "httponly": True,
+        "secure": config.IS_PRODUCTION,
+        "samesite": "none" if config.IS_PRODUCTION else "lax",
+        "path": "/",
+        "max_age": config.REFRESH_TOKEN_DAYS * 24 * 60 * 60,
+    }
+    
+    cookies_to_set = {
+        "refresh_token": refresh_token,
+        "device_id": device_id
+    }
+    
+    for key, value in cookies_to_set.items():
+        response.set_cookie(key=key, value=value, **cookie_config)
 
 def ResponseDeleteCookieHelper(response: Response):
     response.delete_cookie(
