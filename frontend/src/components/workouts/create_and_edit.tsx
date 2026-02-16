@@ -92,6 +92,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
     };
 
     const [prevRoutineName, setPrevRoutineName] = useState<string>("");
+    let lastIsCreating = isCreating;
 
     useEffect(() => {
         if (editType !== "workouts") return;
@@ -122,8 +123,9 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
     }, [selectedRoutineName, routines, editType]);
 
     (useEffect(() => {
-        if (isCreating || editType != "workouts") return;
+        if (isCreating || lastIsCreating == isCreating || editType != "workouts") return;
 
+        lastIsCreating = isCreating;
         setFormData(defaultFormData);
         setSelectedRoutineName("");
     }),
