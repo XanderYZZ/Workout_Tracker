@@ -92,3 +92,9 @@ def GetUserHashedPasswordInDB(email: str) -> str:
         raise ValueError("User not found")  
     
     return user["password"]
+
+def DoesEmailConfirmationTokenExist(token: str) -> bool:
+    pending_users = GetDb()["pending_users"]
+    user = pending_users.find_one({"verification_token": token})
+
+    return user is not None

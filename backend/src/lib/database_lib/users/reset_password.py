@@ -79,3 +79,13 @@ def ResetPassword(user_id: ObjectId, hashed_password: str) -> None:
         {"$set": {"password": hashed_password}}
     )
     refresh_tokens.RevokeAllUserRefreshTokens(user_id)
+
+def DoesResetPasswordTokenExist(token: str) -> bool:
+    collection = GetDb()["password_reset_tokens"]
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    token_doc = collection.find_one({
+        "token_hash": token_hash,
+        "expires_at": {"$gt": datetime.now(timezone.utc)}
+    })
+    
+    return token_doc is not None

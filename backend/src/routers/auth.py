@@ -208,12 +208,12 @@ async def Logout(request: Request, response: Response, current_user: models.Curr
 
 @router.post("/is-request-token-valid", status_code=status.HTTP_200_OK)
 @limiter.limit("10/minute")
-async def IsRequestTokenValid(request: Request, request_model: models.IsRequestTokenValidRequest, response: Response, current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser)):
+async def IsRequestTokenValid(request: Request, request_model: models.IsRequestTokenValidRequest, response: Response):
     if request_model.type == "reset-password":
-        if not reset_password_methods.UserHasResetPasswordToken(current_user.email):
+        if not reset_password_methods.DoesResetPasswordTokenExist(request_model.token):
             raise APIError.unauthorized(ErrorMessage.INVALID_TOKEN)
     elif request_model.type == "email-confirmation":
-        if not general_user_methods.DoesPendingUserExist(current_user.email):
+        if not general_user_methods.DoesEmailConfirmationTokenExist(request_model.token):
             raise APIError.unauthorized(ErrorMessage.INVALID_TOKEN)
     else:
         raise APIError.unauthorized(ErrorMessage.INVALID_TOKEN)

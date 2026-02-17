@@ -233,15 +233,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     }
 
-    const isResetPasswordTokenValid = async (token: string): Promise<boolean> => {
-        isTokenRequestValid("reset-password", token).then((success) => { return success; })
-        return false;
-    }
-
-    const isEmailConfirmationTokenValid = async (token: string): Promise<boolean> => {
-        isTokenRequestValid("email-confirmation", token).then((success) => { return success; })
-        return false;
-    }
+    const isResetPasswordTokenValid = (token: string) => isTokenRequestValid("reset-password", token);
+    const isEmailConfirmationTokenValid = (token: string) => isTokenRequestValid("email-confirmation", token);
 
     const resetPassword = async (
         email: string,
