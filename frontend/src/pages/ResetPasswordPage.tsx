@@ -20,6 +20,7 @@ const ResetPasswordPage = () => {
         initialResetPasswordRequest,
         isEmailInValidForm,
         isResetPasswordTokenValid,
+        accessToken,
     } = useAuth();
     const [token, setToken] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -50,6 +51,12 @@ const ResetPasswordPage = () => {
             }
         });
     }, [searchParams, navigate]);
+
+    useEffect(() => {
+        if (accessToken) {
+            navigate("/workouts");
+        }
+    }, [accessToken, navigate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

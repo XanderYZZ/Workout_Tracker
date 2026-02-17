@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 
 const VerifyEmailPage = () => {
-    const { authenticate, isEmailConfirmationTokenValid } = useAuth();
+    const { authenticate, isEmailConfirmationTokenValid, accessToken } = useAuth();
     const [status, setStatus] = useState("Verifying...");
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -25,6 +25,12 @@ const VerifyEmailPage = () => {
             }
         });
     }, [searchParams, navigate]);
+
+    useEffect(() => {
+        if (accessToken) {
+            navigate("/workouts");
+        }
+    }, [accessToken, navigate]);
 
     return (
         <div className="background-primary flex items-center justify-center">
