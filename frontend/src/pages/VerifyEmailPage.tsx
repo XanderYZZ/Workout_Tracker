@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 
 const VerifyEmailPage = () => {
-    const { authenticate } = useAuth();
+    const { authenticate, isEmailConfirmationTokenValid } = useAuth();
     const [status, setStatus] = useState("Verifying...");
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -17,7 +17,13 @@ const VerifyEmailPage = () => {
             return;
         }
 
-        authenticate(token, email);
+        isEmailConfirmationTokenValid(token).then((valid: boolean) => {
+            if (!valid) {
+                navigate("/invalid-token");
+            } else {
+                authenticate(token, email);
+            }
+        });
     }, [searchParams, navigate]);
 
     return (

@@ -45,6 +45,8 @@ interface AuthContextType {
         formData: any,
         newErrors: Record<string, string>,
     ) => void;
+    isResetPasswordTokenValid: (token: string) => Promise<boolean>;
+    isEmailConfirmationTokenValid: (token: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -220,6 +222,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     };
 
+    const isTokenRequestValid = async (type: string, token: string): Promise<boolean> => {
+        try {
+            const request_data = { "type": type, "token": token, };
+            const response = await unauthenticatedClient.post("/auth/is-request-token-valid", request_data);
+
+            return response.status === 200;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    const isResetPasswordTokenValid = async (token: string): Promise<boolean> => {
+        isTokenRequestValid("reset-password", token).then((success) => { return success; })
+        return false;
+    }
+
+    const isEmailConfirmationTokenValid = async (token: string): Promise<boolean> => {
+        isTokenRequestValid("email-confirmation", token).then((success) => { return success; })
+        return false;
+    }
+
     const resetPassword = async (
         email: string,
         token: string,
@@ -309,6 +332,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 checkPasswordStrength,
                 isEmailInValidForm,
                 validatePasswordInputs,
+                isResetPasswordTokenValid,
+                isEmailConfirmationTokenValid,
             }}
         >
             {children}

@@ -80,3 +80,7 @@ class ResetPasswordModel(BaseModel):
     email: EmailStr
     token: str
     password: str
+
+class IsRequestTokenValidRequest(BaseModel):
+    type: str
+    token: str

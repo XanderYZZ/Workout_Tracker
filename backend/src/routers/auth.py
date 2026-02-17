@@ -205,3 +205,15 @@ async def Logout(request: Request, response: Response, current_user: models.Curr
     ResponseDeleteCookieHelper(response)
 
     return {"message": "Logged out successfully"}
+
+@router.post("/is-request-token-valid", status_code=status.HTTP_200_OK)
+@limiter.limit("5/minute")
+async def IsRequestTokenValid(request: Request, request_model: models.IsRequestTokenValidRequest, response: Response, current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser)):
+    if request_model.type == "reset-password":
+        if not reset_password_methods.UserHasResetPasswordToken(current_user.email):
+            raise APIError.unauthorized(ErrorMessage.INVALID_TOKEN)
+    elif request_model.type == "email-confirmation":
+        if not general_user_methods.DoesPendingUserExist(current_user.email):
+            raise APIError.unauthorized(ErrorMessage.INVALID_TOKEN)
+    else:
+        raise APIError.unauthorized(ErrorMessage.INVALID_TOKEN)

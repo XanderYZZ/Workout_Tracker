@@ -17,6 +17,7 @@ import ProtectedRoute from "./lib/protected_route";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RoutinesProvider } from "./contexts/routines";
+import InvalidToken from "./pages/InvalidToken";
 
 function Layout() {
     return (
@@ -59,6 +60,10 @@ function App() {
                 {
                     path: "/check-inbox",
                     element: <CheckInboxPage />,
+                },
+                {
+                    path: "/invalid-token",
+                    element: <InvalidToken />,
                 },
                 {
                     path: "/login",

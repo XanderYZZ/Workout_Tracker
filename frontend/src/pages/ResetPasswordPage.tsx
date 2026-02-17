@@ -19,6 +19,7 @@ const ResetPasswordPage = () => {
         checkPasswordStrength,
         initialResetPasswordRequest,
         isEmailInValidForm,
+        isResetPasswordTokenValid,
     } = useAuth();
     const [token, setToken] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -39,9 +40,15 @@ const ResetPasswordPage = () => {
             return;
         }
 
-        setFormData({ email: email, password: "", confirmPassword: "" });
-        setToken(token);
-        setIsInEmailState(false);
+        isResetPasswordTokenValid(token).then((valid: boolean) => {
+            if (!valid) {
+                navigate("/invalid-token");
+            } else {
+                setFormData({ email: email, password: "", confirmPassword: "" });
+                setToken(token);
+                setIsInEmailState(false);
+            }
+        });
     }, [searchParams, navigate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
