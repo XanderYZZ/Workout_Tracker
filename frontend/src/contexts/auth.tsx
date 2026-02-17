@@ -224,7 +224,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const isTokenRequestValid = async (type: string, token: string): Promise<boolean> => {
         try {
-            const request_data = { "type": type, "token": token, };
+            const request_data = { type, token, };
             const response = await unauthenticatedClient.post("/auth/is-request-token-valid", request_data);
 
             return response.status === 200;
