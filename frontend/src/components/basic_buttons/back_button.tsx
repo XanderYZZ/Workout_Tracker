@@ -1,5 +1,6 @@
 import type { FC, ReactNode, ButtonHTMLAttributes } from "react";
 import { useNavigate } from "react-router-dom";
+import arrow from "../../assets/navbar/arrow.png";
 
 interface BackButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     children?: ReactNode;
@@ -31,7 +32,7 @@ export const BackButton: FC<BackButtonProps> = ({
             {children ?? (
                 <img
                     className="rotate-90"
-                    src="/navbar/arrow.png"
+                    src={arrow}
                     alt="Back"
                 />
             )}

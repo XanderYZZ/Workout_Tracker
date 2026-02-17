@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 import { useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import arrow from "../assets/navbar/arrow.png";
 
 export const Navbar = () => {
     const { user, logout } = useAuth();
@@ -90,7 +91,7 @@ export const Navbar = () => {
                                                         "transform 300ms ease-in-out",
                                                 }}
                                                 className="w-5 h-5"
-                                                src="/navbar/arrow.png"
+                                                src={arrow}
                                                 alt="Profile"
                                             ></img>
                                         </button>

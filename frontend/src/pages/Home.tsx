@@ -4,11 +4,14 @@ import { Navbar } from "../components/navbar.tsx";
 import { ImageCarousel } from "../components/image_carousel.tsx";
 import { useAuth } from "../contexts/auth.tsx";
 
-const photos = [
-    { src: "/Home/Creation.png" },
-    { src: "/Home/VolumeReport.png" },
-    { src: "/Home/Workouts.png" },
-];
+const images = import.meta.glob(
+    "../assets/Home/Slideshow/*.{png,jpg,jpeg,webp}",
+    { eager: true }
+);
+
+const photos = Object.values(images).map((mod: any) => ({
+    src: mod.default,
+}));
 
 const Home: FC = () => {
     const { user } = useAuth();
