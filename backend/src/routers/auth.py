@@ -207,7 +207,7 @@ async def Logout(request: Request, response: Response, current_user: models.Curr
     return {"message": "Logged out successfully"}
 
 @router.post("/is-request-token-valid", status_code=status.HTTP_200_OK)
-@limiter.limit("5/minute")
+@limiter.limit("10/minute")
 async def IsRequestTokenValid(request: Request, request_model: models.IsRequestTokenValidRequest, response: Response, current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser)):
     if request_model.type == "reset-password":
         if not reset_password_methods.UserHasResetPasswordToken(current_user.email):
