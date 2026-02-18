@@ -13,23 +13,23 @@ const photos = Object.values(images).map((mod: any) => ({
     src: mod.default,
 }));
 
-const grids = [
-    [
-        "Create routines",
-        "Make your own fast templates to create workouts from.",
-    ],
-    [
-        "Log workouts",
-        "Fast input for sets, reps, and weights.",
-    ],
-    [
-        "Create reports",
-        "Use reports to see your progress.",
-    ],
-];
-
 const Home: FC = () => {
     const { user } = useAuth();
+
+    const grids = [
+        [
+            "Create routines",
+            "Make your own fast templates to create workouts from.",
+        ],
+        [
+            "Log workouts",
+            "Fast input for sets, reps, and weights.",
+        ],
+        [
+            "Create reports",
+            "Use reports to see your progress.",
+        ],
+    ];
 
     return (
         <div className="background-primary">
@@ -37,10 +37,10 @@ const Home: FC = () => {
             <main>
                 <section className="relative overflow-hidden">
                     <div className="" />
-                    <section className="max-w-7xl mx-auto px-6 py-24">
+                    <section className="max-w-7xl mx-auto px-6 py-12">
                         <ImageCarousel photos={photos} />
                     </section>
-                    <div className="relative max-w-7xl transform translate-y-[-60px] mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                    <div className="relative max-w-7xl transform translate-y-[-60px] mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                         <div>
                             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-none tracking-tight">
                                 <span className="text-black">
@@ -66,7 +66,7 @@ const Home: FC = () => {
                 </section>
 
                 <section className="bg-slate-900 border-t border-white/10">
-                    <div className={`max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-${grids.length} gap-6`}>
+                    <div className={`max-w-7xl mx-auto px-2 py-6 grid grid-cols-3 gap-8`}>
                         {grids.map(([title, desc]) => (
                             <div
                                 key={title}
