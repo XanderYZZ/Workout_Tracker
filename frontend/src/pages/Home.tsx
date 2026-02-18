@@ -13,6 +13,21 @@ const photos = Object.values(images).map((mod: any) => ({
     src: mod.default,
 }));
 
+const grids = [
+    [
+        "Create routines",
+        "Make your own fast templates to create workouts from.",
+    ],
+    [
+        "Log workouts",
+        "Fast input for sets, reps, and weights.",
+    ],
+    [
+        "Create reports",
+        "Use reports to see your progress.",
+    ],
+];
+
 const Home: FC = () => {
     const { user } = useAuth();
 
@@ -28,17 +43,13 @@ const Home: FC = () => {
                     <div className="relative max-w-7xl transform translate-y-[-60px] mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                         <div>
                             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-none tracking-tight">
-                                Train smarter.
-                                <br />
-                                <span className="text-blue-200">
-                                    Progress faster.
+                                <span className="text-black">
+                                    Stop guessing your workouts. 
                                 </span>
                             </h1>
 
-                            <p className="mt-8 text-lg text-gray-200 max-w-md">
-                                Log workouts, visualize progress, and build
-                                consistency with a fast, no-nonsense tracking
-                                system.
+                            <p className="mt-8 leading-[0.95] tracking-[-0.02em] text-lg text-gray-200 max-w-md">
+                                Track every set, see what actually works, and repeat what makes you get stronger. 
                             </p>
 
                             {(!user || Object.keys(user).length === 0) && (
@@ -55,21 +66,8 @@ const Home: FC = () => {
                 </section>
 
                 <section className="bg-slate-900 border-t border-white/10">
-                    <div className="max-w-6xl mx-auto px-6 py-16 grid grid-cols-1 sm:grid-cols-3 gap-8">
-                        {[
-                            [
-                                "Log workouts",
-                                "Fast input for sets, reps, and weights.",
-                            ],
-                            [
-                                "See progress",
-                                "Visualize strength gains over time.",
-                            ],
-                            [
-                                "Create reports",
-                                "Use reports to see your progress.",
-                            ],
-                        ].map(([title, desc]) => (
+                    <div className={`max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-${grids.length} gap-6`}>
+                        {grids.map(([title, desc]) => (
                             <div
                                 key={title}
                                 className="rounded-xl bg-slate-800/60 border border-white/10 p-6 hover:bg-slate-800 transition"
@@ -77,7 +75,7 @@ const Home: FC = () => {
                                 <h3 className="font-semibold text-white">
                                     {title}
                                 </h3>
-                                <p className="mt-2 text-sm text-slate-400">
+                                <p className="mt-2 text-sm text-gray-400">
                                     {desc}
                                 </p>
                             </div>
