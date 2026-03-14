@@ -14,5 +14,11 @@
             "src": "/(.*)",
             "dest": "src/app.py"
         }
+    ],
+    "crons": [
+        {
+        "path": "/internal/weekly-summary",
+        "schedule": "0 9 * * 0"
+        }
     ]
 }

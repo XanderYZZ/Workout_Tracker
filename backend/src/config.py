@@ -16,6 +16,7 @@ SENDER_EMAIL_PASSWORD = os.getenv("SENDER_EMAIL_PASSWORD")
 REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS", 30))
 IS_PRODUCTION = os.getenv("ENVIRONMENT") == "production"
 MAXIMUM_WORKOUTS_PER_DAY = int(os.getenv("MAXIMUM_WORKOUTS_PER_DAY", 5))
+CRON_SECRET = os.getenv("CRON_SECRET")
 
 # Centralized rate limiter instance
 limiter = Limiter(key_func=get_remote_address)

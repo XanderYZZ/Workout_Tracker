@@ -1,13 +1,14 @@
 from typing import List, Optional
 from bson import ObjectId
-from fastapi import Query, Request, status, APIRouter, Depends
-from lib.database_lib import models 
-from lib.database_lib.users import auth_helper 
+from fastapi import BackgroundTasks, Query, Request, status, APIRouter, Depends
+from lib.database_lib import models
+from lib.database_lib.users import auth_helper
 from lib.database_lib.workouts import workout_methods as general_workout_methods
 from datetime import datetime, timezone
-import config 
+import config
 from config import limiter
 from lib.misc.error_handler import APIError, ErrorMessage
+from tasks import CheckPersonalRecords
 
 router = APIRouter(tags=["workouts"], prefix="/workouts")
 
@@ -16,6 +17,7 @@ router = APIRouter(tags=["workouts"], prefix="/workouts")
 @limiter.limit("10/minute")
 async def CreateWorkout(
     request: Request,
+    background_tasks: BackgroundTasks,
     workout: models.Workout,
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
@@ -42,6 +44,7 @@ async def CreateWorkout(
         )
 
     workout_id = general_workout_methods.CreateWorkout(workout_dict)
+    background_tasks.add_task(CheckPersonalRecords, current_user.user_id, workout_id)
     created_workout = general_workout_methods.GetWorkoutById(workout_id, current_user.user_id)
     
     if not created_workout:
