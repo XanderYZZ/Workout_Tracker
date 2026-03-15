@@ -144,11 +144,13 @@ const Reports: FC = () => {
     const getWorkoutsInPeriod = () => {
         const inPeriod: Workout[] = [];
 
-        for (let workout of workouts) {
-            const [y, m, d] = workout.scheduled_date.slice(0, 10).split("-").map(Number);
-            const scheduledDate = new Date(y, m - 1, d);
+        const startStr = DatesLibrary.convertDateToYMD(startDate);
+        const endStr = DatesLibrary.convertDateToYMD(endDate);
 
-            if (scheduledDate >= startDate && scheduledDate <= endDate) {
+        for (let workout of workouts) {
+            const scheduledDateStr = workout.scheduled_date.slice(0, 10);
+
+            if (scheduledDateStr >= startStr && scheduledDateStr <= endStr) {
                 if (!selectedExerciseName) {
                     inPeriod.push(workout);
                 } else {
