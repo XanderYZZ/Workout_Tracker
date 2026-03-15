@@ -349,7 +349,7 @@ const Reports: FC = () => {
                     {reportType === "contains" && (
                         <div className="flex justify-center pt-32">
                             <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
-                                <h1 className="text-white-900 text-lg text-center">
+                                <h1 className="text-black text-lg text-center">
                                     Select an exercise to show all workouts that
                                     contain it.
                                 </h1>
@@ -420,7 +420,7 @@ const Reports: FC = () => {
                     {reportType === "volume" && (
                         <div className="flex justify-center pt-32">
                             <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
-                                <h1 className="text-white-900 text-lg">
+                                <h1 className="text-black text-lg">
                                     Volume Report
                                 </h1>
 
@@ -449,7 +449,7 @@ const Reports: FC = () => {
                     {reportType === "1rm" && (
                         <div className="flex justify-center pt-32">
                             <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
-                                <h1 className="text-white-900 text-lg">
+                                <h1 className="text-black text-lg">
                                     1RM Report
                                 </h1>
 
