@@ -59,11 +59,17 @@ const Reports: FC = () => {
             return;
         }
 
-        const newContains = workouts.filter((workout) =>
-            workout.exercises.some(
-                (exerciseObj) => exerciseObj.name == selectedExerciseName,
-            ),
-        );
+        const newContains = workouts
+            .filter((workout) =>
+                workout.exercises.some(
+                    (exerciseObj) => exerciseObj.name == selectedExerciseName,
+                ),
+            )
+            .sort(
+                (a, b) =>
+                    new Date(b.scheduled_date).getTime() -
+                    new Date(a.scheduled_date).getTime(),
+            );
         setContainsWorkouts(newContains);
         setStatus("success");
     };
