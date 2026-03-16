@@ -171,22 +171,7 @@ const Reports: FC = () => {
         return inPeriod;
     };
 
-    const generateVolumeOr1RMReport = (isVolume: boolean) => {
-        if (!areDatesValid()) {
-            Notifications.showError("Please select a start and end date!");
-            return;
-        }
-
-        if (
-            !isVolume &&
-            (selectedExerciseName == null || selectedExerciseName == "")
-        ) {
-            Notifications.showError(
-                "Please select an exercise for the 1RM report!",
-            );
-            return;
-        }
-
+    const computeReport = (isVolume: boolean) => {
         const inPeriod = getWorkoutsInPeriod();
         let perDay: { [date: string]: number } = {};
         let total: number = 0; // For the volume reports.
@@ -252,6 +237,33 @@ const Reports: FC = () => {
 
         setGraphData(new_graph_data);
     };
+
+    const generateVolumeOr1RMReport = (isVolume: boolean) => {
+        if (!areDatesValid()) {
+            Notifications.showError("Please select a start and end date!");
+            return;
+        }
+
+        if (
+            !isVolume &&
+            (selectedExerciseName == null || selectedExerciseName == "")
+        ) {
+            Notifications.showError(
+                "Please select an exercise for the 1RM report!",
+            );
+            return;
+        }
+
+        computeReport(isVolume);
+    };
+
+    useEffect(() => {
+        if (reportType === "volume" && volumeReportTotal !== null) {
+            computeReport(true);
+        } else if (reportType === "1rm" && oneRepMaxExercise !== "") {
+            computeReport(false);
+        }
+    }, [workouts]);
 
     const generateVolumeReport = () => {
         generateVolumeOr1RMReport(true);
