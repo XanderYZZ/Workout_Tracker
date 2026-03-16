@@ -4,6 +4,7 @@ import { hasScheduledDate } from "./common_methods.tsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../lib/apiclient.tsx";
 import { Notifications } from "../../lib/notifications.tsx";
+import { DatesLibrary } from "../../lib/dates.tsx";
 import { RoutineDropdown } from "../dropdowns/routine_dropdown.tsx";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
@@ -137,7 +138,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                 .post(endpoint, {
                     ...data,
                     scheduled_date: hasScheduledDate(data)
-                        ? new Date(data.scheduled_date).toISOString()
+                        ? DatesLibrary.toLocalISOString(new Date(data.scheduled_date))
                         : undefined,
                 })
                 .then((res) => res.data),
@@ -170,7 +171,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                 .put(`${endpoint}${id}`, {
                     ...data,
                     scheduled_date: hasScheduledDate(data)
-                        ? new Date(data.scheduled_date).toISOString()
+                        ? DatesLibrary.toLocalISOString(new Date(data.scheduled_date))
                         : undefined,
                 })
                 .then((res) => res.data),

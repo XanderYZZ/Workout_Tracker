@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import re
 from typing import Dict, List, Optional
 from ..database_config import GetDb
@@ -24,15 +24,16 @@ def GetWorkoutById(workout_id: str, user_id: str) -> Optional[Dict]:
 
 def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
     workouts = GetDb()["workouts"]
-    
-    start_of_day = datetime(date.year, date.month, date.day, tzinfo=timezone.utc)
-    end_of_day = datetime(date.year, date.month, date.day, 23, 59, 59, 999999, tzinfo=timezone.utc)
+
+    local_midnight = date.replace(hour=0, minute=0, second=0, microsecond=0)
+    start_of_day = local_midnight.astimezone(timezone.utc)
+    end_of_day = (local_midnight + timedelta(days=1)).astimezone(timezone.utc)
     
     count = workouts.count_documents({
         "user_id": user_id,
         "scheduled_date": {
             "$gte": start_of_day, 
-            "$lte": end_of_day
+            "$lt": end_of_day
         }
     })
     
@@ -41,12 +42,13 @@ def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
 def IsThereAWorkoutWithNameOnSameDate(user_id: str, name: str, date: datetime) -> bool:
     workouts = GetDb()["workouts"]
 
-    start_of_day = datetime(date.year, date.month, date.day, tzinfo=timezone.utc)
-    end_of_day = datetime(date.year, date.month, date.day, 23, 59, 59, 999999, tzinfo=timezone.utc)
+    local_midnight = date.replace(hour=0, minute=0, second=0, microsecond=0)
+    start_of_day = local_midnight.astimezone(timezone.utc)
+    end_of_day = (local_midnight + timedelta(days=1)).astimezone(timezone.utc)
     normalized_name = general_methods.NormalizeName(name)
     daily_workouts = workouts.find({
         "user_id": user_id,
-        "scheduled_date": {"$gte": start_of_day, "$lte": end_of_day}
+        "scheduled_date": {"$gte": start_of_day, "$lt": end_of_day}
     })
 
     for workout in daily_workouts:

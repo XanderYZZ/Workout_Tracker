@@ -147,8 +147,10 @@ const Reports: FC = () => {
         const startStr = DatesLibrary.convertDateToYMD(startDate);
         const endStr = DatesLibrary.convertDateToYMD(endDate);
 
+        console.log(startStr + ", " + endStr);
+
         for (let workout of workouts) {
-            const scheduledDateStr = workout.scheduled_date.slice(0, 10);
+            const scheduledDateStr = DatesLibrary.convertDateToYMD(new Date(workout.scheduled_date));
 
             if (scheduledDateStr >= startStr && scheduledDateStr <= endStr) {
                 if (!selectedExerciseName) {
@@ -190,8 +192,8 @@ const Reports: FC = () => {
         let total: number = 0; // For the volume reports.
 
         for (const entry of inPeriod) {
-            const key = entry.scheduled_date;
-            perDay[key] = 0;
+            const key = DatesLibrary.convertDateToYMD(new Date(entry.scheduled_date));
+            if (!(key in perDay)) perDay[key] = 0;
 
             if (isVolume) {
                 for (const exercise of entry.exercises) {
@@ -240,7 +242,7 @@ const Reports: FC = () => {
         const new_graph_data: GraphPoint[] = Object.entries(perDay).map(
             ([day, amt]) => ({
                 name: DatesLibrary.formatDateToLocaleDateString(
-                    day,
+                    day + "T00:00:00",
                     true,
                     true,
                 ),
