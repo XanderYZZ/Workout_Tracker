@@ -210,7 +210,9 @@ const Reports: FC = () => {
             }
         }
 
-        perDay = Object.fromEntries(Object.entries(perDay).reverse());
+        perDay = Object.fromEntries(
+            Object.entries(perDay).sort(([a], [b]) => a.localeCompare(b)),
+        );
 
         if (isVolume) {
             setVolumeReportTotal(total);
